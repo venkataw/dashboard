@@ -32,11 +32,22 @@ export class ActionbarDetailExportpdfComponent {
   onClick(): void {
     console.log('PDF generating!');
 
-    this.generatePodPdf();
+    switch (this.typeMeta.kind) {
+      case 'pod':
+        this.generatePodPdf();
+        break;
+      default:
+        console.log('K8s object type not supported. Aborting');
+        break;
+    }
   }
 
   private generatePodPdf() {
-    const pdf = new jsPDF();
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      format: 'legal',
+      userUnit: 300,
+    });
     pdf.html(document.getElementsByTagName('kd-pod-detail')[0] as HTMLElement, {
       callback: function (pdf) {
         pdf.save('Report-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf');
