@@ -34,3 +34,6 @@ npm-debug.log
 
 # Helm
 aio/deploy/helm-chart/kubernetes-dashboard/charts
+
+# K8s test dir
+k8s-test/

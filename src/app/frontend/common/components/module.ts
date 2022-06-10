@@ -20,6 +20,7 @@ import {DirectivesModule} from '../directives/module';
 
 import {ActionbarComponent} from './actionbar/component';
 import {ActionbarDetailActionsComponent} from './actionbar/detailactions/component';
+import {ActionbarDetailExportpdfComponent} from './actionbar/detailactions/pdf/component';
 import {ActionbarDetailDeleteComponent} from './actionbar/detailactions/delete/component';
 import {ActionbarDetailEditComponent} from './actionbar/detailactions/edit/component';
 import {ActionbarDetailExecComponent} from './actionbar/detailactions/exec/component';
@@ -109,6 +110,7 @@ import {ZeroStateComponent} from './zerostate/component';
 
 const components = [
   ActionbarDetailActionsComponent,
+  ActionbarDetailExportpdfComponent,
   ActionbarDetailDeleteComponent,
   ActionbarDetailEditComponent,
   ActionbarDetailScaleComponent,
