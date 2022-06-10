@@ -16,6 +16,7 @@ import {Component, Input} from '@angular/core';
 import {ObjectMeta, TypeMeta} from '@api/root.api';
 
 import {VerberService} from '@common/services/global/verber';
+import {jsPDF} from 'jspdf';
 
 @Component({
   selector: 'kd-actionbar-detail-exportpdf',
@@ -30,5 +31,16 @@ export class ActionbarDetailExportpdfComponent {
 
   onClick(): void {
     console.log('PDF generating!');
+
+    this.generatePodPdf();
+  }
+
+  private generatePodPdf() {
+    const pdf = new jsPDF();
+    pdf.html(document.getElementsByTagName('kd-pod-detail')[0] as HTMLElement, {
+      callback: function (pdf) {
+        pdf.save('Report-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf');
+      },
+    });
   }
 }
