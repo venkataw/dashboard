@@ -1394,6 +1394,14 @@
           <context context-type="linenumber">25</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="1340474636551072849" datatype="html">
+        <source>Export PDF report</source>
+        <target state="new">Export PDF report</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/common/components/actionbar/detailactions/pdf/template.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="1371553127733924023" datatype="html">
         <source>Scale</source>
         <target>Skalieren</target>
