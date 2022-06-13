@@ -37,6 +37,22 @@ export class ActionbarDetailExportpdfComponent {
     ['replicaset', 'kd-replica-set-detail'],
     ['replication-controller', 'kd-replication-controller-detail'],
     ['statefulset', 'kd-stateful-set-detail'],
+    ['clusterrole', 'kd-cluster-role-detail'],
+    ['clusterrolebinding', 'kd-cluster-role-binding-detail'],
+    ['namespace', 'kd-namespace-detail'],
+    ['networkpolicy', 'kd-network-policy-detail'],
+    ['node', 'kd-node-detail'],
+    ['persistentvolume', 'kd-persistent-volume-detail'],
+    ['role', 'kd-role-detail'],
+    ['rolebinding', 'kd-role-detail'],
+    ['serviceaccount', 'kd-service-account-detail'],
+    ['ingress', 'kd-ingress-detail'],
+    ['ingressclass', 'kd-ingress-class-detail'],
+    ['service', 'kd-service-detail'],
+    ['configmap', 'kd-config-map-detail'],
+    ['persistentvolumeclaim', 'kd-persistent-volume-claim-detail'],
+    ['secret', 'kd-secret-detail'],
+    ['storageclass', 'kd-storage-class-detail'],
   ]);
 
   constructor(private readonly verber_: VerberService) {}
