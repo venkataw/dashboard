@@ -36,16 +36,17 @@ export class ActionbarDetailExportpdfComponent {
     ['job', 'kd-job-detail'],
     ['replicaset', 'kd-replica-set-detail'],
     ['replication-controller', 'kd-replication-controller-detail'],
-    ['stateful-set', 'kd-stateful-set-detail']
+    ['statefulset', 'kd-stateful-set-detail']
   ]);
 
   constructor(private readonly verber_: VerberService) {}
 
   onClick(): void {
-    console.log('PDF generating!');
-    try {
+    const searchElement = ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind);
+    if (searchElement != null) {
+      console.log('Generating pdf, typeMeta.kind is ' + this.typeMeta.kind + ", mapped is " + searchElement);
       this.generatePdf(ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind));
-    } catch (err) {
+    } else {
       console.error("K8s object type not supported yet, aborting");
     }
   }
@@ -55,13 +56,18 @@ export class ActionbarDetailExportpdfComponent {
       orientation: 'landscape',
       unit: 'mm',
       //format: [297, 210], A4 paper
-      format: [800, 500],
+      format: [1500, 1100],
       userUnit: 300,
     });
-    pdf.html(document.getElementsByTagName(componentName)[0] as HTMLElement, {
-      callback: function (pdf) {
-        pdf.save('Report-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf');
-      },
-    });
+    let targetElement: HTMLElement = document.getElementsByTagName(componentName)[0] as HTMLElement;
+    if (targetElement != null) {
+      pdf.html(targetElement, {
+        callback: function (pdf) {
+          pdf.save('Report-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf');
+        },
+      });
+    } else {
+      console.error("Error! targetElement was not found! componentName: " + componentName);
+    }
   }
 }
