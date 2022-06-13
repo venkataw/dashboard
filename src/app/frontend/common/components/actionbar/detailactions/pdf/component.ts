@@ -36,38 +36,38 @@ export class ActionbarDetailExportpdfComponent {
     ['job', 'kd-job-detail'],
     ['replicaset', 'kd-replica-set-detail'],
     ['replication-controller', 'kd-replication-controller-detail'],
-    ['statefulset', 'kd-stateful-set-detail']
+    ['statefulset', 'kd-stateful-set-detail'],
   ]);
 
   constructor(private readonly verber_: VerberService) {}
 
   onClick(): void {
     const searchElement = ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind);
-    if (searchElement != null) {
-      console.log('Generating pdf, typeMeta.kind is ' + this.typeMeta.kind + ", mapped is " + searchElement);
+    if (searchElement !== null && searchElement !== undefined) {
+      console.log('Generating pdf, typeMeta.kind is ' + this.typeMeta.kind + ', mapped is ' + searchElement);
       this.generatePdf(ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind));
     } else {
-      console.error("K8s object type not supported yet, aborting");
+      console.error('K8s object type not supported yet, aborting');
     }
   }
 
   private generatePdf(componentName: string) {
+    const targetElement: HTMLElement = document.getElementsByTagName(componentName)[0] as HTMLElement;
     const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
       //format: [297, 210], A4 paper
-      format: [1500, 1100],
+      format: [1500, targetElement.offsetWidth],
       userUnit: 300,
     });
-    let targetElement: HTMLElement = document.getElementsByTagName(componentName)[0] as HTMLElement;
-    if (targetElement != null) {
+    if (targetElement !== null && targetElement !== undefined) {
       pdf.html(targetElement, {
         callback: function (pdf) {
           pdf.save('Report-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf');
         },
       });
     } else {
-      console.error("Error! targetElement was not found! componentName: " + componentName);
+      console.error('Error! targetElement was not found! componentName: ' + componentName);
     }
   }
 }
