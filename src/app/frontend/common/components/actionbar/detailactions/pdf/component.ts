@@ -27,28 +27,38 @@ export class ActionbarDetailExportpdfComponent {
   @Input() typeMeta: TypeMeta;
   @Input() displayName: string;
 
+  static k8sObjectMap: Map<string, string> = new Map<string, string>([
+    ['pod', 'kd-pod-detail'],
+    ['workloads', 'kd-workload-statuses'],
+    ['cronjob', 'kd-cron-job-detail'],
+    ['daemonset', 'kd-daemon-set-detail'],
+    ['deployment', 'kd-deployment-detail'],
+    ['job', 'kd-job-detail'],
+    ['replicaset', 'kd-replica-set-detail'],
+    ['replication-controller', 'kd-replication-controller-detail'],
+    ['stateful-set', 'kd-stateful-set-detail']
+  ]);
+
   constructor(private readonly verber_: VerberService) {}
 
   onClick(): void {
     console.log('PDF generating!');
-
-    switch (this.typeMeta.kind) {
-      case 'pod':
-        this.generatePodPdf();
-        break;
-      default:
-        console.log('K8s object type not supported. Aborting');
-        break;
+    try {
+      this.generatePdf(ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind));
+    } catch (err) {
+      console.error("K8s object type not supported yet, aborting");
     }
   }
 
-  private generatePodPdf() {
+  private generatePdf(componentName: string) {
     const pdf = new jsPDF({
       orientation: 'landscape',
-      format: 'legal',
+      unit: 'mm',
+      //format: [297, 210], A4 paper
+      format: [800, 500],
       userUnit: 300,
     });
-    pdf.html(document.getElementsByTagName('kd-pod-detail')[0] as HTMLElement, {
+    pdf.html(document.getElementsByTagName(componentName)[0] as HTMLElement, {
       callback: function (pdf) {
         pdf.save('Report-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf');
       },
