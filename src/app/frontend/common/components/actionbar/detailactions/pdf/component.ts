@@ -13,10 +13,12 @@
 // limitations under the License.
 
 import {Component, Input} from '@angular/core';
+import {MatSnackBar, MatSnackBarRef, TextOnlySnackBar} from '@angular/material/snack-bar';
 import {ObjectMeta, TypeMeta} from '@api/root.api';
 
 import {VerberService} from '@common/services/global/verber';
 import {jsPDF} from 'jspdf';
+import {ExportPdfComponent} from './pdftracker';
 
 @Component({
   selector: 'kd-actionbar-detail-exportpdf',
@@ -55,12 +57,17 @@ export class ActionbarDetailExportpdfComponent {
     ['storageclass', 'kd-storage-class-detail'],
   ]);
 
-  constructor(private readonly verber_: VerberService) {}
+  static currentSnackbar: MatSnackBarRef<TextOnlySnackBar>;
+
+  constructor(private readonly verber_: VerberService, private readonly matSnackBar_: MatSnackBar) {
+    ExportPdfComponent.exportPdfComponent = this;
+  }
 
   onClick(): void {
     const searchElement = ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind);
     if (searchElement !== null && searchElement !== undefined) {
       console.log('Generating pdf, typeMeta.kind is ' + this.typeMeta.kind + ', mapped is ' + searchElement);
+      ActionbarDetailExportpdfComponent.currentSnackbar = this.matSnackBar_.open('Generating pdf...', 'Dismiss');
       this.generatePdf(ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind));
     } else {
       console.error('K8s object type not supported yet, aborting');
@@ -79,11 +86,19 @@ export class ActionbarDetailExportpdfComponent {
     if (targetElement !== null && targetElement !== undefined) {
       pdf.html(targetElement, {
         callback: function (pdf) {
+          ExportPdfComponent.exportPdfComponent.dismissCurrentSnackbar();
           pdf.save('Report-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf');
         },
       });
     } else {
       console.error('Error! targetElement was not found! componentName: ' + componentName);
+    }
+  }
+
+  dismissCurrentSnackbar(): void {
+    const curSnackbar: MatSnackBarRef<TextOnlySnackBar> = ActionbarDetailExportpdfComponent.currentSnackbar;
+    if (curSnackbar !== null || curSnackbar !== undefined) {
+      curSnackbar.dismiss();
     }
   }
 }
