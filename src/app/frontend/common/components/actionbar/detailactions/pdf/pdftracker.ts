@@ -12,11 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PodDetail} from '@api/root.api';
+import {Container} from '@api/root.api';
 import {ActionbarDetailExportpdfComponent} from './component';
 
 export class ExportPdfComponent {
   static exportPdfComponent: ActionbarDetailExportpdfComponent;
-  static curTypeMeta: string;
-  static curPodDetail: PodDetail;
+
+  static curNamespace: string;
+  static curResourceType: string;
+  static curResourceName: string;
+  static curContainers: Container[];
+
+  static clearCurResource(): void {
+    ExportPdfComponent.curNamespace = undefined;
+    ExportPdfComponent.curResourceType = undefined;
+    ExportPdfComponent.curResourceName = undefined;
+    ExportPdfComponent.curContainers = undefined;
+  }
+
+  static setCurResource(namespace: string, type: string, name: string, containers: Container[]) {
+    ExportPdfComponent.curNamespace = namespace;
+    ExportPdfComponent.curResourceType = type;
+    ExportPdfComponent.curResourceName = name;
+    ExportPdfComponent.curContainers = containers;
+  }
 }

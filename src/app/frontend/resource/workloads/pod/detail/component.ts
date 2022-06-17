@@ -58,8 +58,7 @@ export class PodDetailComponent implements OnInit, OnDestroy {
       .get(this.endpoint_.detail(), resourceName, resourceNamespace)
       .pipe(takeUntil(this.unsubscribe_))
       .subscribe((d: PodDetail) => {
-        ExportPdfComponent.curPodDetail = d;
-        ExportPdfComponent.curTypeMeta = 'pod';
+        ExportPdfComponent.setCurResource(d.objectMeta.namespace, d.typeMeta.kind, d.objectMeta.name, d.containers);
 
         this.pod = d;
         this.notifications_.pushErrors(d.errors);
@@ -69,7 +68,7 @@ export class PodDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    ExportPdfComponent.curTypeMeta = undefined;
+    ExportPdfComponent.clearCurResource();
 
     this.unsubscribe_.next();
     this.unsubscribe_.complete();

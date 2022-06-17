@@ -14,10 +14,8 @@
 
 import {Component, Input} from '@angular/core';
 import {MatSnackBar, MatSnackBarRef, TextOnlySnackBar} from '@angular/material/snack-bar';
-import {LogDetails, LogSources, ObjectMeta, PodDetail, TypeMeta} from '@api/root.api';
+import {LogDetails, LogSources, ObjectMeta, TypeMeta, Container} from '@api/root.api';
 import {LogService} from '@common/services/global/logs';
-
-import {VerberService} from '@common/services/global/verber';
 import {jsPDF} from 'jspdf';
 import {Observable} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
@@ -70,30 +68,22 @@ export class ActionbarDetailExportpdfComponent {
   resourceType: any;
   resourceName: any;
   containerName: any;
+  containers: Container[];
   logsSnapshot: LogDetails;
 
   private pageWidth: number;
 
-  constructor(
-    private readonly verber_: VerberService,
-    private readonly matSnackBar_: MatSnackBar,
-    readonly logService: LogService
-  ) {
+  constructor(private readonly matSnackBar_: MatSnackBar, readonly logService: LogService) {
     ExportPdfComponent.exportPdfComponent = this;
 
-    console.log('These are the details in the constructor');
-    console.log(logService);
-    //console.log(activatedRoute_);
-    console.log(this.typeMeta);
-
-    if (ExportPdfComponent.curTypeMeta === 'pod') {
-      const podDetail: PodDetail = ExportPdfComponent.curPodDetail;
-      this.namespace = podDetail.objectMeta.namespace;
-      this.resourceType = podDetail.typeMeta.kind;
-      this.resourceName = podDetail.objectMeta.name;
-      this.containerName = podDetail.containers[0].name; //TODO: FIX THIS (support for all containers in different pages)
+    if (ExportPdfComponent.curResourceType === 'pod') {
+      this.namespace = ExportPdfComponent.curNamespace;
+      this.resourceType = ExportPdfComponent.curResourceType;
+      this.resourceName = ExportPdfComponent.curResourceName;
+      this.containers = ExportPdfComponent.curContainers;
+      this.containerName = this.containers[0].name; //TODO: FIX THIS (support for all containers in different pages)
     } else {
-      console.log('No logs available for type ' + ExportPdfComponent.curTypeMeta + ', skipping logs collection');
+      console.log('No logs available for type ' + ExportPdfComponent.curResourceType + ', skipping logs collection');
       this.namespace = undefined;
       this.resourceType = undefined;
       this.resourceName = undefined;
@@ -125,8 +115,7 @@ export class ActionbarDetailExportpdfComponent {
         .pipe(
           switchMap<LogSources, Observable<LogDetails>>(data => {
             this.logSources = data;
-            this.pod = data.podNames[0]; // Pick first pod (cannot use resource name as it may
-            // not be a pod).
+            this.pod = data.podNames[0]; // Pick first pod (cannot use resource name as it may not be a pod).
             this.container = this.containerName ? this.containerName : data.containerNames[0]; // Pick from URL or first.
 
             return this.logService.getResource(`${this.namespace}/${this.pod}/${this.container}`);
@@ -186,7 +175,7 @@ export class ActionbarDetailExportpdfComponent {
       // add logs section
       pdf.addPage();
       pdf.setFontSize(56);
-      pdf.text('Logs for container "' + this.containerName + '" on "' + this.resourceName, 20, 20);
+      pdf.text('Logs for container "' + this.containerName + '" on "' + this.resourceName + '"', 20, 30);
       pdf.setFontSize(36);
       let i = 0;
       for (const log of this.logsSnapshot.logs) {
@@ -198,7 +187,7 @@ export class ActionbarDetailExportpdfComponent {
           pageY = 50 + 20 * i;
         }
         const splitText: string[] = pdf.splitTextToSize(log.timestamp + ' --- ' + log.content, this.pageWidth);
-        pdf.text(splitText, 20, 50 + 20 * i); // TODO: clean this up (different colors)
+        pdf.text(splitText, 20, pageY); // TODO: clean this up (different colors)
         i += splitText.length;
       }
     } else {
