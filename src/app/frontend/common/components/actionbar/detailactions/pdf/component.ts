@@ -14,7 +14,6 @@
 
 import {Component, Input} from '@angular/core';
 import {MatSnackBar, MatSnackBarRef, TextOnlySnackBar} from '@angular/material/snack-bar';
-//import {ActivatedRoute} from '@angular/router';
 import {LogDetails, LogSources, ObjectMeta, PodDetail, TypeMeta} from '@api/root.api';
 import {LogService} from '@common/services/global/logs';
 
@@ -78,7 +77,7 @@ export class ActionbarDetailExportpdfComponent {
   constructor(
     private readonly verber_: VerberService,
     private readonly matSnackBar_: MatSnackBar,
-    readonly logService: LogService //private readonly activatedRoute_: ActivatedRoute
+    readonly logService: LogService
   ) {
     ExportPdfComponent.exportPdfComponent = this;
 
@@ -108,11 +107,6 @@ export class ActionbarDetailExportpdfComponent {
     console.log(this.resourceType);
     console.log(this.resourceName);
     console.log(this.containerName);
-
-    /*this.namespace = "gabrian";
-    this.resourceType = "pod";
-    this.resourceName = "phpmyadmin-deployment-7d8fc9d9cc-lz4t4";
-    this.containerName = "phpmyadmin";*/
   }
 
   onClick(): void {
@@ -134,12 +128,10 @@ export class ActionbarDetailExportpdfComponent {
             this.pod = data.podNames[0]; // Pick first pod (cannot use resource name as it may
             // not be a pod).
             this.container = this.containerName ? this.containerName : data.containerNames[0]; // Pick from URL or first.
-            //this.appendContainerParam_();
 
             return this.logService.getResource(`${this.namespace}/${this.pod}/${this.container}`);
           })
         )
-        //.pipe(tap(_ => (this.logService.getAutoRefresh() ? this.toggleIntervalFunction_() : undefined)))
         .pipe(take(1))
         .subscribe(data => {
           // finished loading
