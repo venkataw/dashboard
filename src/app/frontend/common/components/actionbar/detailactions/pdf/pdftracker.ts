@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {PodDetail} from '@api/root.api';
 import {ActionbarDetailExportpdfComponent} from './component';
 
 export class ExportPdfComponent {
   static exportPdfComponent: ActionbarDetailExportpdfComponent;
+  static curTypeMeta: string;
+  static curPodDetail: PodDetail;
 }
