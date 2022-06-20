@@ -186,8 +186,11 @@ export class ActionbarDetailExportpdfComponent {
           i = 0;
           pageY = 50 + 20 * i;
         }
-        const splitText: string[] = pdf.splitTextToSize(log.timestamp + ' --- ' + log.content, this.pageWidth);
-        pdf.text(splitText, 20, pageY); // TODO: clean this up (different colors)
+        pdf.setTextColor('#333333');
+        pdf.text(log.timestamp + ' --- ', 20, pageY);
+        const splitText: string[] = pdf.splitTextToSize(log.content, this.pageWidth);
+        pdf.setTextColor('#000000');
+        pdf.text(splitText, 245, pageY);
         i += splitText.length;
       }
     } else {
