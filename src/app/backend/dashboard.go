@@ -39,6 +39,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/handler"
 	"github.com/kubernetes/dashboard/src/app/backend/integration"
 	integrationapi "github.com/kubernetes/dashboard/src/app/backend/integration/api"
+	"github.com/kubernetes/dashboard/src/app/backend/pdf"
 	"github.com/kubernetes/dashboard/src/app/backend/settings"
 	"github.com/kubernetes/dashboard/src/app/backend/sync"
 	"github.com/kubernetes/dashboard/src/app/backend/systembanner"
@@ -165,6 +166,10 @@ func main() {
 	http.Handle("/config", handler.AppHandler(handler.ConfigHandler))
 	http.Handle("/api/sockjs/", handler.CreateAttachHandler("/api/sockjs"))
 	http.Handle("/metrics", promhttp.Handler())
+
+	// TEMP!! EXPORT TEST PDF
+	pdf.GenerateTestPdf()
+	log.Print("Test pdf exported to /tmp/test.pdf")
 
 	// Listen for http or https
 	if servingCerts != nil {
