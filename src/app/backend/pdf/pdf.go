@@ -39,6 +39,9 @@ var pointMap = map[string]Point{
 	"podlogs.logs":         {30, 50},
 }
 
+const reportHeight float64 = 297
+const reportWidth float64 = 210
+
 func GenerateTestPdf() error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
@@ -67,14 +70,14 @@ func GenerateTestReport() error {
 	pdf.SetFont("Helvetica", "", 14)
 
 	titlePage := gofpdi.ImportPage(pdf, "templates/title_page.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, titlePage, 0, 0, 210, 297)
+	gofpdi.UseImportedTemplate(pdf, titlePage, 0, 0, reportWidth, reportHeight)
 	reportGenerated := time.Now().Format("01-02-2006_15-04-05")
 	addText(pdf, "title.generated", reportGenerated)
 	addText(pdf, "title.namespace", "SAMPLE-NAMESPACE")
 
 	pdf.AddPage()
 	podDetailPage := gofpdi.ImportPage(pdf, "templates/pod_detail.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, podDetailPage, 0, 0, 210, 297)
+	gofpdi.UseImportedTemplate(pdf, podDetailPage, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "poddetail.name", "SAMPLE-POD-ABCDEF1234567890")
 	addText(pdf, "poddetail.labels", "LABEL1, LABEL2, LABEL3, LABEL4, LABEL5")
 	addText(pdf, "poddetail.taints", "SAMPLE.SAMPLE/SAMPLE:SAMPLE op=Exists for 300s")
@@ -85,7 +88,7 @@ func GenerateTestReport() error {
 
 	pdf.AddPage()
 	podLogsPage := gofpdi.ImportPage(pdf, "templates/pod_logs.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, podLogsPage, 0, 0, 210, 297)
+	gofpdi.UseImportedTemplate(pdf, podLogsPage, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "podlogs.name", "SAMPLE-POD-ABCDEF1234567890")
 	addText(pdf, "podlogs.logs", "LOG1\nLOG2\nLOG3")
 
