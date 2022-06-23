@@ -170,12 +170,9 @@ func main() {
 	// TEMP!! EXPORT TEST PDF
 	//pdf.GenerateTestPdf()
 	//log.Print("Test pdf exported to /tmp/test.pdf")
-	pdferr := pdf.GenerateTemplatePdf()
-	if pdferr != nil {
-		log.Print("Test template pdf exported to /tmp/test2.pdf")
-	} else {
-		log.Print(pdferr)
-	}
+	pdferr := pdf.GenerateTestTitlePage()
+	log.Print("Test template pdf exported to /tmp/test2.pdf")
+	log.Print(pdferr)
 
 	// Listen for http or https
 	if servingCerts != nil {
