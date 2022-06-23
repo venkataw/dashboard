@@ -168,8 +168,14 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 
 	// TEMP!! EXPORT TEST PDF
-	pdf.GenerateTestPdf()
-	log.Print("Test pdf exported to /tmp/test.pdf")
+	//pdf.GenerateTestPdf()
+	//log.Print("Test pdf exported to /tmp/test.pdf")
+	pdferr := pdf.GenerateTemplatePdf()
+	if pdferr != nil {
+		log.Print("Test template pdf exported to /tmp/test2.pdf")
+	} else {
+		log.Print(pdferr)
+	}
 
 	// Listen for http or https
 	if servingCerts != nil {

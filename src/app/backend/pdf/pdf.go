@@ -16,6 +16,7 @@ package pdf
 
 import (
 	"github.com/phpdave11/gofpdf"
+	"github.com/phpdave11/gofpdf/contrib/gofpdi"
 )
 
 func GenerateTestPdf() error {
@@ -24,5 +25,19 @@ func GenerateTestPdf() error {
 	pdf.SetFont("Helvetica", "B", 16)
 	pdf.Cell(20, 20, "Hello World!")
 	err := pdf.OutputFileAndClose("/tmp/test.pdf")
+	return err
+}
+
+func GenerateTemplatePdf() error {
+	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Helvetica", "", 16)
+	//title_page := gofpdi.ImportPage(pdf, "/home/gabrian/dashboard/src/app/backend/pdf/templates/title_page.pdf", 1, "/MediaBox")
+	title_page := gofpdi.ImportPage(pdf, "src/app/backend/pdf/templates/title_page.pdf", 1, "/MediaBox")
+	gofpdi.UseImportedTemplate(pdf, title_page, 0, 0, 210, 297)
+
+	pdf.Cell(50, 50, "I added this text here!")
+
+	err := pdf.OutputFileAndClose("/tmp/test2.pdf")
 	return err
 }
