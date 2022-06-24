@@ -61,28 +61,6 @@ var pointMap = map[string]Point{
 const reportHeight float64 = 297
 const reportWidth float64 = 210
 
-func GenerateTestPdf() error {
-	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
-	pdf.AddPage()
-	pdf.SetFont("Helvetica", "B", 16)
-	pdf.Cell(20, 20, "Hello World!")
-	err := pdf.OutputFileAndClose("/tmp/test.pdf")
-	return err
-}
-
-func GenerateTemplatePdf() error {
-	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
-	pdf.AddPage()
-	pdf.SetFont("Helvetica", "", 16)
-	title_page := gofpdi.ImportPage(pdf, "src/app/backend/pdf/templates/title_page.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, title_page, 0, 0, 210, 297)
-
-	pdf.Text(50, 50, "I added this text here!")
-
-	err := pdf.OutputFileAndClose("/tmp/test2.pdf")
-	return err
-}
-
 func GenerateTestReport() error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
