@@ -15,6 +15,7 @@
 package pdf
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/phpdave11/gofpdf"
@@ -50,11 +51,11 @@ var pointMap = map[string]Point{
 	"node.osimage":                  {30, 90},
 	"node.ip":                       {30, 110},
 	"node.schedulable":              {70, 120},
-	"node.state.networkunavailable": {90, 140},
-	"node.state.memorypressure":     {90, 150},
-	"node.state.diskpressure":       {90, 160},
-	"node.state.pidpressure":        {90, 170},
-	"node.state.ready":              {90, 180},
+	"node.state.networkunavailable": {90, 137},
+	"node.state.memorypressure":     {90, 147},
+	"node.state.diskpressure":       {90, 157},
+	"node.state.pidpressure":        {90, 167},
+	"node.state.ready":              {90, 177},
 	"node.events":                   {30, 195},
 }
 
@@ -66,61 +67,86 @@ func GenerateTestReport() error {
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 14)
 
-	titlePage := gofpdi.ImportPage(pdf, "templates/title_page.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, titlePage, 0, 0, reportWidth, reportHeight)
-	reportGenerated := time.Now().Format("01-02-2006_15-04-05")
-	addText(pdf, "title.generated", reportGenerated)
-	addText(pdf, "title.namespace", "SAMPLE-NAMESPACE")
+	addTitlePage(pdf, "SAMPLE-NAMESPACE")
 
-	pdf.AddPage()
-	podDetailPage := gofpdi.ImportPage(pdf, "templates/pod_detail.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, podDetailPage, 0, 0, reportWidth, reportHeight)
-	addText(pdf, "poddetail.name", "SAMPLE-POD-ABCDEF1234567890")
-	addText(pdf, "poddetail.labels", "LABEL1, LABEL2, LABEL3, LABEL4, LABEL5")
-	addText(pdf, "poddetail.taints", "SAMPLE.SAMPLE/SAMPLE:SAMPLE op=Exists for 300s")
-	addText(pdf, "poddetail.containers", "CONTAINER1", "CONTAINER2", "CONTAINER3")
-	addText(pdf, "poddetail.pvc", "SAMPLE PVC")
-	addText(pdf, "poddetail.nodes", "NODE1, NODE2, NODE3, NODE4, NODE5")
-	addText(pdf, "poddetail.events", "EVENT1", "EVENT2", "EVENT3")
+	addPodDetailPage(pdf, "SAMPLE-POD-ABCDEF1234567890", "LABEL1, LABEL2, LABEL3, LABEL4, LABEL5", "SAMPLE.SAMPLE/SAMPLE:SAMPLE op=Exists for 300s",
+		[]string{"CONTAINER1", "CONTAINER2", "CONTAINER3"}, "SAMPLE-PVC-1", "NODE1, NODE2, NODE3", []string{"EVENT1", "EVENT2", "EVENT3"})
 
-	pdf.AddPage()
-	podLogsPage := gofpdi.ImportPage(pdf, "templates/pod_logs.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, podLogsPage, 0, 0, reportWidth, reportHeight)
-	addText(pdf, "podlogs.name", "SAMPLE-POD-ABCDEF1234567890")
-	addText(pdf, "podlogs.logs", "LOG1", "LOG2", "LOG3", "LOG4", "LOG5")
+	addPodLogsPage(pdf, "SAMPLE-POD-ABCDEF1234567890", []string{"LOG1", "LOG2", "LOG3", "LOG4", "LOG5"})
 
-	pdf.AddPage()
-	nodePage := gofpdi.ImportPage(pdf, "templates/node_detail.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, nodePage, 0, 0, reportWidth, reportHeight)
-	addText(pdf, "node.name", "SAMPLE-NODE1")
-	addText(pdf, "node.labels", "LABEL1, LABEL2, LABEL3")
-	addText(pdf, "node.taints", "SAMPLE.SAMPLE/SAMPLE:SAMPLE op=Exists for 300s")
-	addText(pdf, "node.osimage", "Linux Shminux 22.04 LTS")
-	addText(pdf, "node.ip", "123.123.123.123")
-	addText(pdf, "node.schedulable", "Truefalse")
-	addText(pdf, "node.state.networkunavailable", "Truefalse")
-	addText(pdf, "node.state.memorypressure", "Truefalse")
-	addText(pdf, "node.state.diskpressure", "Truefalse")
-	addText(pdf, "node.state.pidpressure", "Truefalse")
-	addText(pdf, "node.state.ready", "Truefalse")
-	addText(pdf, "node.events", "EVENT1", "EVENT2", "EVENT3")
+	addNodePage(pdf, "NODE1", "LABEL1, LABEL2, LABEL3", "SAMPLE.SAMPLE/SAMPLE:SAMPLE op=Exists for 300s", "Linux Shminux 22.04 LTS", "123.123.123.123",
+		false, false, false, false, false, true, []string{"EVENT1", "EVENT2", "EVENT3"})
 
-	pdf.AddPage()
-	pvcPage := gofpdi.ImportPage(pdf, "templates/pvc_detail.pdf", 1, "/MediaBox")
-	gofpdi.UseImportedTemplate(pdf, pvcPage, 0, 0, reportWidth, reportHeight)
-	addText(pdf, "pvc.name", "SAMPLE-PVC-1")
-	addText(pdf, "pvc.state", "bound")
-	addText(pdf, "pvc.storageclass", "local-storage")
-	addText(pdf, "pvc.volume", "SAMPLE-PV-1")
-	addText(pdf, "pvc.labels", "LABEL1, LABEL2, LABEL3, LABEL4")
-	addText(pdf, "pvc.capacity", "100Gi")
-	addText(pdf, "pvc.events", "EVENT1", "EVENT2", "EVENT3")
+	addPvcPage(pdf, "SAMPLE-PVC-1", "bound", "local-storage", "SAMPLE-PV-1", "LABEL1, LABEL2, LABEL3", "100Ti", []string{"EVENT1", "EVENT2", "EVENT3"})
 
-	err := pdf.OutputFileAndClose("/tmp/Report-" + reportGenerated + ".pdf")
+	err := pdf.OutputFileAndClose("/tmp/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
 	return err
 }
 
-func addText(pdf *gofpdf.Fpdf, key string, text ...string) {
+func addTitlePage(pdf *gofpdf.Fpdf, namespace string) {
+	titlePage := gofpdi.ImportPage(pdf, "templates/title_page.pdf", 1, "/MediaBox")
+	gofpdi.UseImportedTemplate(pdf, titlePage, 0, 0, reportWidth, reportHeight)
+	addText(pdf, "title.generated", time.Now().String())
+	addText(pdf, "title.namespace", namespace)
+}
+
+func addPodDetailPage(pdf *gofpdf.Fpdf, podName, podLabels, podTaints string, podContainers []string, podPvc, podNodes string, podEvents []string) {
+	pdf.AddPage()
+	podDetailPage := gofpdi.ImportPage(pdf, "templates/pod_detail.pdf", 1, "/MediaBox")
+	gofpdi.UseImportedTemplate(pdf, podDetailPage, 0, 0, reportWidth, reportHeight)
+	addText(pdf, "poddetail.name", podName)
+	addText(pdf, "poddetail.labels", podLabels)
+	addText(pdf, "poddetail.taints", podTaints)
+	addMultilineText(pdf, "poddetail.containers", podContainers)
+	addText(pdf, "poddetail.pvc", podPvc)
+	addText(pdf, "poddetail.nodes", podNodes)
+	addMultilineText(pdf, "poddetail.events", podEvents)
+}
+
+func addPodLogsPage(pdf *gofpdf.Fpdf, podName string, logs []string) {
+	pdf.AddPage()
+	podLogsPage := gofpdi.ImportPage(pdf, "templates/pod_logs.pdf", 1, "/MediaBox")
+	gofpdi.UseImportedTemplate(pdf, podLogsPage, 0, 0, reportWidth, reportHeight)
+	addText(pdf, "podlogs.name", podName)
+	addMultilineText(pdf, "podlogs.logs", logs)
+}
+
+func addNodePage(pdf *gofpdf.Fpdf, nodeName, labels, taints, osimage, ip string, schedulable, networkunavailable, memorypressure, diskpressure, pidpressure, ready bool, events []string) {
+	pdf.AddPage()
+	nodePage := gofpdi.ImportPage(pdf, "templates/node_detail.pdf", 1, "/MediaBox")
+	gofpdi.UseImportedTemplate(pdf, nodePage, 0, 0, reportWidth, reportHeight)
+	addText(pdf, "node.name", nodeName)
+	addText(pdf, "node.labels", labels)
+	addText(pdf, "node.taints", taints)
+	addText(pdf, "node.osimage", osimage)
+	addText(pdf, "node.ip", ip)
+	addText(pdf, "node.schedulable", strconv.FormatBool(schedulable))
+	addText(pdf, "node.state.networkunavailable", strconv.FormatBool(networkunavailable))
+	addText(pdf, "node.state.memorypressure", strconv.FormatBool(memorypressure))
+	addText(pdf, "node.state.diskpressure", strconv.FormatBool(diskpressure))
+	addText(pdf, "node.state.pidpressure", strconv.FormatBool(pidpressure))
+	addText(pdf, "node.state.ready", strconv.FormatBool(ready))
+	addMultilineText(pdf, "node.events", events)
+}
+
+func addPvcPage(pdf *gofpdf.Fpdf, pvcName, state, storageclass, volume, labels, capacity string, events []string) {
+	pdf.AddPage()
+	pvcPage := gofpdi.ImportPage(pdf, "templates/pvc_detail.pdf", 1, "/MediaBox")
+	gofpdi.UseImportedTemplate(pdf, pvcPage, 0, 0, reportWidth, reportHeight)
+	addText(pdf, "pvc.name", pvcName)
+	addText(pdf, "pvc.state", state)
+	addText(pdf, "pvc.storageclass", storageclass)
+	addText(pdf, "pvc.volume", volume)
+	addText(pdf, "pvc.labels", labels)
+	addText(pdf, "pvc.capacity", capacity)
+	addMultilineText(pdf, "pvc.events", events)
+}
+
+func addText(pdf *gofpdf.Fpdf, key string, text string) {
+	location := pointMap[key]
+	pdf.Text(location.x, location.y, text)
+}
+func addMultilineText(pdf *gofpdf.Fpdf, key string, text []string) {
 	location := pointMap[key]
 	for i, item := range text {
 		pdf.Text(location.x, location.y+float64(5*i), item)
