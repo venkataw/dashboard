@@ -51,6 +51,27 @@ func getPdf(request *restful.Request, response *restful.Response) {
 	}
 }
 
+func genPdf(request *restful.Request, response *restful.Response) {
+	fmt.Print("Got request to generate a pdf. Request: ")
+	fmt.Println(request)
+	namespace := request.PathParameter("namespace")
+	fmt.Print("Want from namespace: ")
+	fmt.Println(namespace)
+
+	// TODO: GENERATE HEALTH CHECK PDF ON DEMAND
+
+	response.WriteHeader(http.StatusOK)
+}
+
+func genTestPdf(request *restful.Request, response *restful.Response) {
+	fmt.Print("Got request to generate a TEST pdf. Request: ")
+	fmt.Println(request)
+
+	GenerateTestReport() // TODO: this doesn't seem to work correctly
+
+	response.WriteHeader(http.StatusOK)
+}
+
 func CreatePdfApiHandler() (http.Handler, error) {
 	fmt.Println("Initializing pdf api handler...")
 
@@ -71,9 +92,15 @@ func CreatePdfApiHandler() (http.Handler, error) {
 			To(getPdfList).
 			Writes(pdfDetail{}))
 	pdfApiWs.Route(
-		pdfApiWs.GET("/{pdfname}").
+		pdfApiWs.GET("/pdf/{pdfname}").
 			To(getPdf).
 			Writes(pdfContent{}))
+	pdfApiWs.Route(
+		pdfApiWs.GET("/gen").
+			To(genTestPdf))
+	pdfApiWs.Route(
+		pdfApiWs.GET("/gen/{namespace}").
+			To(genPdf))
 
 	fmt.Println("pdf api handler initialized.")
 
