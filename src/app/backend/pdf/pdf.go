@@ -62,6 +62,8 @@ var pointMap = map[string]Point{
 const reportHeight float64 = 297
 const reportWidth float64 = 210
 
+const ReportDir string = "/tmp/pdf"
+
 func GenerateTestReport() error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
@@ -79,7 +81,7 @@ func GenerateTestReport() error {
 
 	addPvcPage(pdf, "SAMPLE-PVC-1", "bound", "local-storage", "SAMPLE-PV-1", "LABEL1, LABEL2, LABEL3", "100Ti", []string{"EVENT1", "EVENT2", "EVENT3"})
 
-	err := pdf.OutputFileAndClose("/tmp/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
+	err := pdf.OutputFileAndClose(ReportDir + "/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
 	return err
 }
 
