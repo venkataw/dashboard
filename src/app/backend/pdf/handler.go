@@ -1,6 +1,7 @@
 package pdf
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,12 +12,9 @@ import (
 type pdfDetail struct {
 	Name string `json:"name"`
 }
-
-/*var testPdfs = []pdfDetail{
-	{Name: "Report-06-27-2022_12-33-44.pdf"},
-	{Name: "notreal.pdf"},
-	{Name: "notrealagain.pdf"},
-}*/
+type pdfContent struct {
+	Contents []byte `json:"contents"`
+}
 
 func getPdfList(request *restful.Request, response *restful.Response) {
 	fmt.Print("Got request for pdf list. Request: ")
@@ -34,6 +32,23 @@ func getPdfList(request *restful.Request, response *restful.Response) {
 	fmt.Println(pdfList)
 
 	response.WriteHeaderAndEntity(http.StatusOK, pdfList)
+}
+
+func getPdf(request *restful.Request, response *restful.Response) {
+	fmt.Print("Got request for a pdf. Request: ")
+	fmt.Println(request)
+	pdfname := request.PathParameter("pdfname")
+	fmt.Print("Want pdf: ")
+	fmt.Println(pdfname)
+
+	content, err := os.ReadFile(ReportDir + "/" + pdfname)
+	if errors.Is(err, os.ErrNotExist) {
+		response.WriteHeaderAndEntity(http.StatusOK, pdfContent{Contents: nil})
+	} else if err != nil {
+		panic(err)
+	} else {
+		response.WriteHeaderAndEntity(http.StatusOK, pdfContent{Contents: content})
+	}
 }
 
 func CreatePdfApiHandler() (http.Handler, error) {
@@ -55,6 +70,10 @@ func CreatePdfApiHandler() (http.Handler, error) {
 		pdfApiWs.GET("/").
 			To(getPdfList).
 			Writes(pdfDetail{}))
+	pdfApiWs.Route(
+		pdfApiWs.GET("/{pdfname}").
+			To(getPdf).
+			Writes(pdfContent{}))
 
 	fmt.Println("pdf api handler initialized.")
 
