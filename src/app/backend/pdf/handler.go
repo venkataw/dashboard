@@ -30,6 +30,8 @@ type pdfContent struct {
 	Contents []byte `json:"contents"`
 }
 
+var ApiPort = 9090
+
 func getPdfList(request *restful.Request, response *restful.Response) {
 	fmt.Print("Got request for pdf list. Request: ")
 	fmt.Println(request)
@@ -86,8 +88,10 @@ func genTestPdf(request *restful.Request, response *restful.Response) {
 	response.WriteHeader(http.StatusOK)
 }
 
-func CreatePdfApiHandler() (http.Handler, error) {
+func CreatePdfApiHandler(port int) (http.Handler, error) {
 	fmt.Println("Initializing pdf api handler...")
+
+	ApiPort = port
 
 	err := os.MkdirAll(ReportDir, os.ModePerm)
 	if err != nil {

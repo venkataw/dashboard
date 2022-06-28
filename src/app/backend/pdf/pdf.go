@@ -59,10 +59,11 @@ var pointMap = map[string]Point{
 	"node.events":                   {30, 195},
 }
 
-const reportHeight float64 = 297
-const reportWidth float64 = 210
-
-const ReportDir string = "/tmp/pdf"
+const (
+	reportHeight float64 = 297
+	reportWidth  float64 = 210
+	ReportDir    string  = "/tmp/pdf"
+)
 
 func GenerateReport(namespace string) error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
