@@ -72,7 +72,7 @@ func genPdf(request *restful.Request, response *restful.Response) {
 	fmt.Print("Want from namespace: ")
 	fmt.Println(namespace)
 
-	// TODO: GENERATE HEALTH CHECK PDF ON DEMAND
+	GenerateReport(namespace)
 
 	response.WriteHeader(http.StatusOK)
 }

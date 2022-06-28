@@ -64,6 +64,17 @@ const reportWidth float64 = 210
 
 const ReportDir string = "/tmp/pdf"
 
+func GenerateReport(namespace string) error {
+	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Helvetica", "", 14)
+
+	addTitlePage(pdf, namespace)
+
+	err := pdf.OutputFileAndClose(ReportDir + "/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
+	return err
+}
+
 func GenerateTestReport() error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
