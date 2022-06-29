@@ -163,9 +163,9 @@ func main() {
 	// PDF Report API handler
 	var pdfHandler http.Handler
 	if servingCerts != nil {
-		pdfHandler, err = pdf.CreatePdfApiHandler(args.Holder.GetPort())
+		pdfHandler, err = pdf.CreatePdfApiHandler(args.Holder.GetPort(), true)
 	} else {
-		pdfHandler, err = pdf.CreatePdfApiHandler(args.Holder.GetInsecurePort())
+		pdfHandler, err = pdf.CreatePdfApiHandler(args.Holder.GetInsecurePort(), false)
 	}
 	if err != nil {
 		handleFatalInitError(err)

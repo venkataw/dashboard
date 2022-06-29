@@ -16,7 +16,7 @@ package pdf
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -30,11 +30,13 @@ type pdfContent struct {
 	Contents []byte `json:"contents"`
 }
 
-var ApiPort = 9090
+var (
+	ApiPort = 9090
+	Secure  = false
+)
 
 func getPdfList(request *restful.Request, response *restful.Response) {
-	fmt.Print("Got request for pdf list. Request: ")
-	fmt.Println(request)
+	log.Printf("Got request for pdf list. Request: %v", request)
 
 	files, err := os.ReadDir(ReportDir)
 	if err != nil {
@@ -44,18 +46,15 @@ func getPdfList(request *restful.Request, response *restful.Response) {
 	for i, file := range files {
 		pdfList[i].Name = file.Name()
 	}
-	fmt.Print("pdfList built. Contents sending: ")
-	fmt.Println(pdfList)
+	log.Printf("pdfList built. Contents sending: %v", pdfList)
 
 	response.WriteHeaderAndEntity(http.StatusOK, pdfList)
 }
 
 func getPdf(request *restful.Request, response *restful.Response) {
-	fmt.Print("Got request for a pdf. Request: ")
-	fmt.Println(request)
+	log.Printf("Got request for a pdf. Request: %v", request)
 	pdfname := request.PathParameter("pdfname")
-	fmt.Print("Want pdf: ")
-	fmt.Println(pdfname)
+	log.Printf("Want pdf: %v", pdfname)
 
 	content, err := os.ReadFile(ReportDir + "/" + pdfname)
 	if errors.Is(err, os.ErrNotExist) {
@@ -68,30 +67,28 @@ func getPdf(request *restful.Request, response *restful.Response) {
 }
 
 func genPdf(request *restful.Request, response *restful.Response) {
-	fmt.Print("Got request to generate a pdf. Request: ")
-	fmt.Println(request)
+	log.Printf("Got request to generate a pdf. Request: %v", request)
 	namespace := request.PathParameter("namespace")
-	fmt.Print("Want from namespace: ")
-	fmt.Println(namespace)
+	log.Printf("Want from namespace: %v", namespace)
 
-	GenerateReport(namespace)
+	GenerateReport(namespace) // TODO: template name
 
 	response.WriteHeader(http.StatusOK)
 }
 
 func genTestPdf(request *restful.Request, response *restful.Response) {
-	fmt.Print("Got request to generate a TEST pdf. Request: ")
-	fmt.Println(request)
+	log.Printf("Got request to generate a TEST pdf. Request: %v", request)
 
 	GenerateTestReport() // TODO: this doesn't seem to work correctly
 
 	response.WriteHeader(http.StatusOK)
 }
 
-func CreatePdfApiHandler(port int) (http.Handler, error) {
-	fmt.Println("Initializing pdf api handler...")
+func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
+	log.Print("Initializing pdf api handler...")
 
 	ApiPort = port
+	Secure = isSecure
 
 	err := os.MkdirAll(ReportDir, os.ModePerm)
 	if err != nil {
@@ -120,7 +117,7 @@ func CreatePdfApiHandler(port int) (http.Handler, error) {
 		pdfApiWs.GET("/gen/{namespace}").
 			To(genPdf))
 
-	fmt.Println("pdf api handler initialized.")
+	log.Print("pdf api handler initialized.")
 
 	return wsContainer, nil
 }

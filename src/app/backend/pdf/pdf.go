@@ -15,15 +15,32 @@
 package pdf
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/kubernetes/dashboard/src/app/backend/api"
+	metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/logs"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/pod"
 	"github.com/phpdave11/gofpdf"
 	"github.com/phpdave11/gofpdf/contrib/gofpdi"
 )
 
 type Point struct {
 	x, y float64
+}
+
+type PodResponse struct {
+	ListMeta          api.ListMeta          `json:"listMeta"`
+	CumulativeMetrics []metricapi.Metric    `json:"cumulativeMetrics"`
+	Status            common.ResourceStatus `json:"status"`
+	Pods              []pod.PodDetail       `json:"pods"`
 }
 
 var pointMap = map[string]Point{
@@ -72,10 +89,35 @@ func GenerateReport(namespace string) error {
 
 	addTitlePage(pdf, namespace)
 
-	err := pdf.OutputFileAndClose(ReportDir + "/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
+	resp, err := getPodDetail(namespace)
+	if err != nil {
+		log.Printf("Error getting pod detail. Skipping. Error: %v", err)
+	} else {
+		for _, pod := range resp.Pods {
+			log.Printf("Pod detail gotten: %v", pod)
+			var labels string = ""
+			for key, value := range pod.ObjectMeta.Labels {
+				labels += key + ":" + value + ", "
+			}
+			labels = labels[0 : len(labels)-2]
+			logDetail, err := getPodLogs(namespace, pod.ObjectMeta.Name)
+			if err != nil {
+				log.Printf("Error getting logs for pod %s in namespace %s. Error: %v", pod.ObjectMeta.Name, namespace, err)
+			}
+
+			logArr := make([]string, len(logDetail.LogLines))
+			for i, value := range logDetail.LogLines {
+				logArr[i] = string(value.Timestamp) + "---" + value.Content
+			}
+
+			addPodDetailPage(pdf, pod.ObjectMeta.Name, labels, "tbi", pod.ContainerImages, "tbi", pod.NodeName, []string{"tbi"}) // TODO: IMPLEMENT TAINT, PVC, EVENTS
+			addPodLogsPage(pdf, pod.ObjectMeta.Name, logArr)
+		}
+	}
+
+	err = pdf.OutputFileAndClose(ReportDir + "/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
 	return err
 }
-
 func GenerateTestReport() error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
@@ -96,14 +138,12 @@ func GenerateTestReport() error {
 	err := pdf.OutputFileAndClose(ReportDir + "/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
 	return err
 }
-
 func addTitlePage(pdf *gofpdf.Fpdf, namespace string) {
 	titlePage := gofpdi.ImportPage(pdf, "templates/title_page.pdf", 1, "/MediaBox")
 	gofpdi.UseImportedTemplate(pdf, titlePage, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "title.generated", time.Now().String())
 	addText(pdf, "title.namespace", namespace)
 }
-
 func addPodDetailPage(pdf *gofpdf.Fpdf, podName, podLabels, podTaints string, podContainers []string, podPvc, podNodes string, podEvents []string) {
 	pdf.AddPage()
 	podDetailPage := gofpdi.ImportPage(pdf, "templates/pod_detail.pdf", 1, "/MediaBox")
@@ -116,7 +156,6 @@ func addPodDetailPage(pdf *gofpdf.Fpdf, podName, podLabels, podTaints string, po
 	addText(pdf, "poddetail.nodes", podNodes)
 	addMultilineText(pdf, "poddetail.events", podEvents)
 }
-
 func addPodLogsPage(pdf *gofpdf.Fpdf, podName string, logs []string) {
 	pdf.AddPage()
 	podLogsPage := gofpdi.ImportPage(pdf, "templates/pod_logs.pdf", 1, "/MediaBox")
@@ -124,7 +163,6 @@ func addPodLogsPage(pdf *gofpdf.Fpdf, podName string, logs []string) {
 	addText(pdf, "podlogs.name", podName)
 	addMultilineText(pdf, "podlogs.logs", logs)
 }
-
 func addNodePage(pdf *gofpdf.Fpdf, nodeName, labels, taints, osimage, ip string, schedulable, networkunavailable, memorypressure, diskpressure, pidpressure, ready bool, events []string) {
 	pdf.AddPage()
 	nodePage := gofpdi.ImportPage(pdf, "templates/node_detail.pdf", 1, "/MediaBox")
@@ -142,7 +180,6 @@ func addNodePage(pdf *gofpdf.Fpdf, nodeName, labels, taints, osimage, ip string,
 	addText(pdf, "node.state.ready", strconv.FormatBool(ready))
 	addMultilineText(pdf, "node.events", events)
 }
-
 func addPvcPage(pdf *gofpdf.Fpdf, pvcName, state, storageclass, volume, labels, capacity string, events []string) {
 	pdf.AddPage()
 	pvcPage := gofpdi.ImportPage(pdf, "templates/pvc_detail.pdf", 1, "/MediaBox")
@@ -155,7 +192,6 @@ func addPvcPage(pdf *gofpdf.Fpdf, pvcName, state, storageclass, volume, labels, 
 	addText(pdf, "pvc.capacity", capacity)
 	addMultilineText(pdf, "pvc.events", events)
 }
-
 func addText(pdf *gofpdf.Fpdf, key string, text string) {
 	location := pointMap[key]
 	pdf.Text(location.x, location.y, text)
@@ -165,4 +201,67 @@ func addMultilineText(pdf *gofpdf.Fpdf, key string, text []string) {
 	for i, item := range text {
 		pdf.Text(location.x, location.y+float64(5*i), item)
 	}
+}
+
+func getPodDetail(namespace string) (response pod.PodList, err error) {
+	resp, err := getHttp("pod/" + namespace)
+	if err != nil {
+		log.Printf("Error getting pod detail in namespace %s, error: %v", namespace, err)
+		return pod.PodList{}, err
+	}
+	bodyBytes, err := parseHtmlToBytes(resp)
+	if err != nil {
+		log.Printf("Error parsing html of pod detail in namespace %s, error: %v", namespace, err)
+		return pod.PodList{}, err
+	}
+
+	var detail pod.PodList = pod.PodList{}
+	err = json.Unmarshal(bodyBytes, &detail)
+	if err != nil {
+		log.Printf("Error parsing json of pod detail in namespace %s, error: %v", namespace, err)
+		return pod.PodList{}, err
+	}
+
+	return detail, nil
+}
+func getPodLogs(namespace string, pod string) (response logs.LogDetails, err error) {
+	resp, err := getHttp("log/" + namespace + "/" + pod)
+	if err != nil {
+		log.Printf("Error getting pod detail in namespace %s, error: %v", namespace, err)
+		return logs.LogDetails{}, err
+	}
+	bodyBytes, err := parseHtmlToBytes(resp)
+	if err != nil {
+		log.Printf("Error parsing html of pod detail in namespace %s, error: %v", namespace, err)
+		return logs.LogDetails{}, err
+	}
+
+	var logDetails logs.LogDetails = logs.LogDetails{}
+	err = json.Unmarshal(bodyBytes, &logDetails)
+	if err != nil {
+		log.Printf("Error parsing json of pod detail in namespace %s, error: %v", namespace, err)
+		return logs.LogDetails{}, err
+	}
+
+	return logDetails, nil
+}
+func getProtocol() string {
+	if Secure {
+		return "https://"
+	} else {
+		return "http://"
+	}
+}
+func getHttp(path string) (resp *http.Response, err error) {
+	return http.Get(getProtocol() + "localhost:" + fmt.Sprint(ApiPort) + "/api/v1/" + path)
+}
+func parseHtmlToBytes(response *http.Response) (result []byte, err error) {
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("Error reading http body, error: %v", err)
+		return nil, err
+	}
+	bodyBytes := []byte(body)
+	return bodyBytes, nil
 }
