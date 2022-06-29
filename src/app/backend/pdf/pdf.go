@@ -141,8 +141,6 @@ func GenerateTestReport() error {
 	nodePageId := importer.ImportPage(pdf, "templates/node_detail.pdf", 1, "/MediaBox")
 	pvcPageId := importer.ImportPage(pdf, "templates/pvc_detail.pdf", 1, "/MediaBox")
 
-	//log.Printf("title %d poddetail %d podlogs %d node %d pvc %d", titlePageId, podDetailPageId, podLogsPageId, nodePageId, pvcPageId)
-
 	addTitlePage(pdf, titlePageId, "SAMPLE-NAMESPACE")
 
 	addPodDetailPage(pdf, podDetailPageId, "SAMPLE-POD-ABCDEF1234567890", "LABEL1, LABEL2, LABEL3, LABEL4, LABEL5", "SAMPLE.SAMPLE/SAMPLE:SAMPLE op=Exists for 300s",
@@ -159,16 +157,12 @@ func GenerateTestReport() error {
 	return err
 }
 func addTitlePage(pdf *gofpdf.Fpdf, titlePageId int, namespace string) {
-	//titlePage := gofpdi.ImportPage(pdf, "templates/title_page.pdf", 1, "/MediaBox")
-	log.Printf("title page using tplid %d", titlePageId)
 	importer.UseImportedTemplate(pdf, titlePageId, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "title.generated", time.Now().String())
 	addText(pdf, "title.namespace", namespace)
 }
 func addPodDetailPage(pdf *gofpdf.Fpdf, podDetailPageId int, podName, podLabels, podTaints string, podContainers []string, podPvc, podNodes string, podEvents []string) {
 	pdf.AddPage()
-	//podDetailPage := gofpdi.ImportPage(pdf, "templates/pod_detail.pdf", 1, "/MediaBox")
-	log.Printf("pod detail page using tplid %d", podDetailPageId)
 	importer.UseImportedTemplate(pdf, podDetailPageId, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "poddetail.name", podName)
 	addText(pdf, "poddetail.labels", podLabels)
@@ -180,16 +174,12 @@ func addPodDetailPage(pdf *gofpdf.Fpdf, podDetailPageId int, podName, podLabels,
 }
 func addPodLogsPage(pdf *gofpdf.Fpdf, podLogsPageId int, podName string, logs []string) {
 	pdf.AddPage()
-	//podLogsPage := gofpdi.ImportPage(pdf, "templates/pod_logs.pdf", 1, "/MediaBox")
-	log.Printf("pod log page using tplid %d", podLogsPageId)
 	importer.UseImportedTemplate(pdf, podLogsPageId, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "podlogs.name", podName)
 	addMultilineText(pdf, "podlogs.logs", logs)
 }
 func addNodePage(pdf *gofpdf.Fpdf, nodePageId int, nodeName, labels, taints, osimage, ip string, schedulable, networkunavailable, memorypressure, diskpressure, pidpressure, ready bool, events []string) {
 	pdf.AddPage()
-	//nodePage := gofpdi.ImportPage(pdf, "templates/node_detail.pdf", 1, "/MediaBox")
-	log.Printf("title page using tplid %d", nodePageId)
 	importer.UseImportedTemplate(pdf, nodePageId, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "node.name", nodeName)
 	addText(pdf, "node.labels", labels)
@@ -206,8 +196,6 @@ func addNodePage(pdf *gofpdf.Fpdf, nodePageId int, nodeName, labels, taints, osi
 }
 func addPvcPage(pdf *gofpdf.Fpdf, pvcPageId int, pvcName, state, storageclass, volume, labels, capacity string, events []string) {
 	pdf.AddPage()
-	//pvcPage := gofpdi.ImportPage(pdf, "templates/pvc_detail.pdf", 1, "/MediaBox")
-	log.Printf("pvc page using tplid %d", pvcPageId)
 	importer.UseImportedTemplate(pdf, pvcPageId, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "pvc.name", pvcName)
 	addText(pdf, "pvc.state", state)

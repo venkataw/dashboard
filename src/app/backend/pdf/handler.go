@@ -71,7 +71,7 @@ func genPdf(request *restful.Request, response *restful.Response) {
 	namespace := request.PathParameter("namespace")
 	log.Printf("Want from namespace: %v", namespace)
 
-	GenerateReport(namespace) // TODO: template name
+	GenerateReport(namespace)
 
 	response.WriteHeader(http.StatusOK)
 }
@@ -79,7 +79,7 @@ func genPdf(request *restful.Request, response *restful.Response) {
 func genTestPdf(request *restful.Request, response *restful.Response) {
 	log.Printf("Got request to generate a TEST pdf. Request: %v", request)
 
-	GenerateTestReport() // TODO: this doesn't seem to work correctly
+	GenerateTestReport()
 
 	response.WriteHeader(http.StatusOK)
 }
