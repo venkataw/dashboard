@@ -87,7 +87,7 @@ const (
 func GenerateReport(namespace string) error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
-	pdf.SetFont("Helvetica", "", 14)
+	pdf.SetFont("Helvetica", "", 12)
 
 	// import templates
 	importer = gofpdi.NewImporter()
@@ -125,13 +125,13 @@ func GenerateReport(namespace string) error {
 		}
 	}
 
-	err = pdf.OutputFileAndClose(ReportDir + "/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
+	err = pdf.OutputFileAndClose(ReportDir + "/HealthCheck-" + namespace + "-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
 	return err
 }
 func GenerateTestReport() error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
-	pdf.SetFont("Helvetica", "", 14)
+	pdf.SetFont("Helvetica", "", 12)
 
 	// import templates
 	importer = gofpdi.NewImporter()
@@ -153,7 +153,7 @@ func GenerateTestReport() error {
 
 	addPvcPage(pdf, pvcPageId, "SAMPLE-PVC-1", "bound", "local-storage", "SAMPLE-PV-1", "LABEL1, LABEL2, LABEL3", "100Ti", []string{"EVENT1", "EVENT2", "EVENT3"})
 
-	err := pdf.OutputFileAndClose(ReportDir + "/Report-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
+	err := pdf.OutputFileAndClose(ReportDir + "/Test-SAMPLE-NAMESPACE-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
 	return err
 }
 func addTitlePage(pdf *gofpdf.Fpdf, titlePageId int, namespace string) {
