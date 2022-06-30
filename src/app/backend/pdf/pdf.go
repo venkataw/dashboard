@@ -162,7 +162,7 @@ func GenerateReport(namespace string) error {
 					ready = string(item.Status)
 				}
 			}
-			networkUnavailable = "False"
+			networkUnavailable = "tbi"
 			// TODO: IMPLEMENT NETWORKUNAVAILABLE
 			addNodePage(pdf, nodePageId, node.ObjectMeta.Name, labels, taints, nodeInfo.NodeInfo.OSImage, internalIps, !nodeInfo.Unschedulable, networkUnavailable, memoryPressure, diskPressure, pidPressure, ready, events)
 		}
