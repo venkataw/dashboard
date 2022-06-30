@@ -15,35 +15,17 @@
 package pdf
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/kubernetes/dashboard/src/app/backend/api"
-	metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/logs"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/node"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/pod"
 	"github.com/phpdave11/gofpdf"
 	"github.com/phpdave11/gofpdf/contrib/gofpdi"
-	v1 "k8s.io/api/core/v1"
 )
 
 type Point struct {
 	x, y float64
-}
-
-type PodResponse struct {
-	ListMeta          api.ListMeta          `json:"listMeta"`
-	CumulativeMetrics []metricapi.Metric    `json:"cumulativeMetrics"`
-	Status            common.ResourceStatus `json:"status"`
-	Pods              []pod.PodDetail       `json:"pods"`
 }
 
 var pointMap = map[string]Point{
@@ -87,7 +69,7 @@ const (
 	ReportDir    string  = "/tmp/pdf"
 )
 
-func GenerateReport(namespace string) error {
+func GenerateHealthCheckReport(namespace string) error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 12)
@@ -268,175 +250,4 @@ func addMultilineText(pdf *gofpdf.Fpdf, key string, text []string) {
 	for i, item := range text {
 		pdf.Text(location.x, location.y+float64(5*i), item)
 	}
-}
-
-func getPodDetail(namespace string) (response pod.PodList, err error) {
-	resp, err := getHttp("pod/" + namespace)
-	if err != nil {
-		log.Printf("Error getting pod detail in namespace %s, error: %v", namespace, err)
-		return pod.PodList{}, err
-	}
-	bodyBytes, err := parseHtmlToBytes(resp)
-	if err != nil {
-		log.Printf("Error parsing html of pod detail in namespace %s, error: %v", namespace, err)
-		return pod.PodList{}, err
-	}
-
-	var detail pod.PodList = pod.PodList{}
-	err = json.Unmarshal(bodyBytes, &detail)
-	if err != nil {
-		log.Printf("Error parsing json of pod detail in namespace %s, error: %v", namespace, err)
-		return pod.PodList{}, err
-	}
-
-	return detail, nil
-}
-func getPodLogs(namespace string, pod string) (response logs.LogDetails, err error) {
-	resp, err := getHttp("log/" + namespace + "/" + pod)
-	if err != nil {
-		log.Printf("Error getting pod logs in namespace %s, error: %v", namespace, err)
-		return logs.LogDetails{}, err
-	}
-	bodyBytes, err := parseHtmlToBytes(resp)
-	if err != nil {
-		log.Printf("Error parsing html of pod logs in namespace %s, error: %v", namespace, err)
-		return logs.LogDetails{}, err
-	}
-
-	var logDetails logs.LogDetails = logs.LogDetails{}
-	err = json.Unmarshal(bodyBytes, &logDetails)
-	if err != nil {
-		log.Printf("Error parsing json of pod logs in namespace %s, error: %v", namespace, err)
-		return logs.LogDetails{}, err
-	}
-
-	return logDetails, nil
-}
-func getNodeList() (nodes node.NodeList, err error) {
-	resp, err := getHttp("node")
-	if err != nil {
-		log.Printf("Error getting node list, error: %v", err)
-		return node.NodeList{}, err
-	}
-	bodyBytes, err := parseHtmlToBytes(resp)
-	if err != nil {
-		log.Printf("Error parsing html of node list, error: %v", err)
-		return node.NodeList{}, err
-	}
-
-	var nodeDetails node.NodeList = node.NodeList{}
-	err = json.Unmarshal(bodyBytes, &nodeDetails)
-	if err != nil {
-		log.Printf("Error parsing json of node list, error: %v", err)
-		return node.NodeList{}, err
-	}
-
-	return nodeDetails, nil
-}
-func getNodeDetail(nodeName string) (nodeDetail node.NodeDetail, err error) {
-	resp, err := getHttp("node/" + nodeName)
-	if err != nil {
-		log.Printf("Error getting node detail for node %s, error: %v", nodeName, err)
-		return node.NodeDetail{}, err
-	}
-	bodyBytes, err := parseHtmlToBytes(resp)
-	if err != nil {
-		log.Printf("Error parsing html of node detail %s, error: %v", nodeName, err)
-		return node.NodeDetail{}, err
-	}
-
-	var nodeDetails node.NodeDetail = node.NodeDetail{}
-	err = json.Unmarshal(bodyBytes, &nodeDetails)
-	if err != nil {
-		log.Printf("Error parsing json of node detail %s, error: %v", nodeName, err)
-		return node.NodeDetail{}, err
-	}
-
-	return nodeDetails, nil
-}
-func getPvcDetail(namespace string) (claimList persistentvolumeclaim.PersistentVolumeClaimList, err error) {
-	resp, err := getHttp("persistentvolumeclaim/" + namespace)
-	if err != nil {
-		log.Printf("Error getting pvc list for namespace %s, error: %v", namespace, err)
-		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
-	}
-	bodyBytes, err := parseHtmlToBytes(resp)
-	if err != nil {
-		log.Printf("Error parsing html of pvc list in namespace %s, error: %v", namespace, err)
-		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
-	}
-
-	var pvcList persistentvolumeclaim.PersistentVolumeClaimList = persistentvolumeclaim.PersistentVolumeClaimList{}
-	err = json.Unmarshal(bodyBytes, &pvcList)
-	if err != nil {
-		log.Printf("Error parsing json of pvc list in namespace %s, error: %v", namespace, err)
-		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
-	}
-
-	return pvcList, nil
-}
-func getProtocol() string {
-	if Secure {
-		return "https://"
-	} else {
-		return "http://"
-	}
-}
-func getHttp(path string) (resp *http.Response, err error) {
-	return http.Get(getProtocol() + "localhost:" + fmt.Sprint(ApiPort) + "/api/v1/" + path)
-}
-func parseHtmlToBytes(response *http.Response) (result []byte, err error) {
-	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		log.Printf("Error reading http body, error: %v", err)
-		return nil, err
-	}
-	bodyBytes := []byte(body)
-	return bodyBytes, nil
-}
-func formatLabelString(labels map[string]string) string {
-	var formatted string = ""
-	if len(labels) == 0 {
-		return "No labels"
-	}
-	for key, value := range labels {
-		formatted += key + ":" + value + ", "
-	}
-	formatted = formatted[0 : len(formatted)-2]
-	return formatted
-}
-func formatTaintString(taints []v1.Taint) string {
-	var formatted string = ""
-	if len(taints) == 0 {
-		return "No taints"
-	}
-	for _, taint := range taints {
-		formatted += taint.Key + ":" + taint.Value + ", "
-	}
-	formatted = formatted[0 : len(formatted)-2]
-	return formatted
-}
-func formatInternalIpString(addresses []v1.NodeAddress) string {
-	var formatted string = ""
-	if len(addresses) == 0 {
-		return "No addresses"
-	}
-	for _, address := range addresses {
-		if address.Type == "InternalIP" {
-			formatted += address.Address + ", "
-		}
-	}
-	formatted = formatted[0 : len(formatted)-2]
-	return formatted
-}
-func formatEventListArray(events common.EventList) []string {
-	eventArr := make([]string, len(events.Events))
-	for i, event := range events.Events {
-		eventArr[i] = event.Message + ", Reason: " + event.Reason // TODO: ADD MORE DETAILS TO EVENT LIST
-	}
-	if len(eventArr) == 0 {
-		return []string{"No events"}
-	}
-	return eventArr
 }

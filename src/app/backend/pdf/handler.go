@@ -71,7 +71,7 @@ func genPdf(request *restful.Request, response *restful.Response) {
 	namespace := request.PathParameter("namespace")
 	log.Printf("Want from namespace: %v", namespace)
 
-	GenerateReport(namespace)
+	GenerateHealthCheckReport(namespace)
 
 	response.WriteHeader(http.StatusOK)
 }
