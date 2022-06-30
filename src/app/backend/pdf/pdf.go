@@ -142,8 +142,29 @@ func GenerateReport(namespace string) error {
 			taints := formatTaintString(nodeInfo.Taints)
 			internalIps := formatInternalIpString(nodeInfo.Addresses)
 			events := formatEventListArray(nodeInfo.EventList)
-			// TODO: IMPLEMENT NODE PRESSURE INFO
-			addNodePage(pdf, nodePageId, node.ObjectMeta.Name, labels, taints, nodeInfo.NodeInfo.OSImage, internalIps, !nodeInfo.Unschedulable, false, false, false, false, string(nodeInfo.Ready), events)
+			conditions := nodeInfo.Conditions
+			var (
+				networkUnavailable string
+				memoryPressure     string
+				diskPressure       string
+				pidPressure        string
+				ready              string
+			)
+			for _, item := range conditions {
+				switch item.Type {
+				case "MemoryPressure":
+					memoryPressure = string(item.Status)
+				case "DiskPressure":
+					diskPressure = string(item.Status)
+				case "PIDPressure":
+					pidPressure = string(item.Status)
+				case "Ready":
+					ready = string(item.Status)
+				}
+			}
+			networkUnavailable = "False"
+			// TODO: IMPLEMENT NETWORKUNAVAILABLE
+			addNodePage(pdf, nodePageId, node.ObjectMeta.Name, labels, taints, nodeInfo.NodeInfo.OSImage, internalIps, !nodeInfo.Unschedulable, networkUnavailable, memoryPressure, diskPressure, pidPressure, ready, events)
 		}
 	}
 
@@ -182,7 +203,7 @@ func GenerateTestReport() error {
 	addPodLogsPage(pdf, podLogsPageId, "SAMPLE-POD-ABCDEF1234567890", []string{"LOG1", "LOG2", "LOG3", "LOG4", "LOG5"})
 
 	addNodePage(pdf, nodePageId, "NODE1", "LABEL1, LABEL2, LABEL3", "SAMPLE.SAMPLE/SAMPLE:SAMPLE op=Exists for 300s", "Linux Shminux 22.04 LTS", "123.123.123.123",
-		false, false, false, false, false, "True", []string{"EVENT1", "EVENT2", "EVENT3"})
+		false, "false", "false", "false", "false", "True", []string{"EVENT1", "EVENT2", "EVENT3"})
 
 	addPvcPage(pdf, pvcPageId, "SAMPLE-PVC-1", "bound", "local-storage", "SAMPLE-PV-1", "LABEL1, LABEL2, LABEL3", "100Ti", []string{"EVENT1", "EVENT2", "EVENT3"})
 
@@ -211,7 +232,7 @@ func addPodLogsPage(pdf *gofpdf.Fpdf, podLogsPageId int, podName string, logs []
 	addText(pdf, "podlogs.name", podName)
 	addMultilineText(pdf, "podlogs.logs", logs)
 }
-func addNodePage(pdf *gofpdf.Fpdf, nodePageId int, nodeName, labels, taints, osimage, ip string, schedulable, networkunavailable, memorypressure, diskpressure, pidpressure bool, ready string, events []string) {
+func addNodePage(pdf *gofpdf.Fpdf, nodePageId int, nodeName, labels, taints, osimage, ip string, schedulable bool, networkunavailable, memorypressure, diskpressure, pidpressure, ready string, events []string) {
 	pdf.AddPage()
 	importer.UseImportedTemplate(pdf, nodePageId, 0, 0, reportWidth, reportHeight)
 	addText(pdf, "node.name", nodeName)
@@ -220,10 +241,10 @@ func addNodePage(pdf *gofpdf.Fpdf, nodePageId int, nodeName, labels, taints, osi
 	addText(pdf, "node.osimage", osimage)
 	addText(pdf, "node.ip", ip)
 	addText(pdf, "node.schedulable", strconv.FormatBool(schedulable))
-	addText(pdf, "node.state.networkunavailable", strconv.FormatBool(networkunavailable))
-	addText(pdf, "node.state.memorypressure", strconv.FormatBool(memorypressure))
-	addText(pdf, "node.state.diskpressure", strconv.FormatBool(diskpressure))
-	addText(pdf, "node.state.pidpressure", strconv.FormatBool(pidpressure))
+	addText(pdf, "node.state.networkunavailable", networkunavailable)
+	addText(pdf, "node.state.memorypressure", memorypressure)
+	addText(pdf, "node.state.diskpressure", diskpressure)
+	addText(pdf, "node.state.pidpressure", pidpressure)
 	addText(pdf, "node.state.ready", ready)
 	addMultilineText(pdf, "node.events", events)
 }
