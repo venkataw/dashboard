@@ -74,6 +74,8 @@ func GenerateHealthCheckReport(namespace string) error {
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 12)
 
+	// TODO: check if namespace exists
+
 	// import templates
 	importer = gofpdi.NewImporter()
 	titlePageId := importer.ImportPage(pdf, "templates/title_page.pdf", 1, "/MediaBox")
