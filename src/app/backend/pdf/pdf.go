@@ -28,6 +28,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/logs"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/node"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/pod"
 	"github.com/phpdave11/gofpdf"
 	"github.com/phpdave11/gofpdf/contrib/gofpdi"
@@ -97,7 +98,7 @@ func GenerateReport(namespace string) error {
 	podDetailPageId := importer.ImportPage(pdf, "templates/pod_detail.pdf", 1, "/MediaBox")
 	podLogsPageId := importer.ImportPage(pdf, "templates/pod_logs.pdf", 1, "/MediaBox")
 	nodePageId := importer.ImportPage(pdf, "templates/node_detail.pdf", 1, "/MediaBox")
-	//pvcPageId := importer.ImportPage(pdf, "templates/pvc_detail.pdf", 1, "/MediaBox")
+	pvcPageId := importer.ImportPage(pdf, "templates/pvc_detail.pdf", 1, "/MediaBox")
 
 	addTitlePage(pdf, titlePageId, namespace)
 
@@ -128,7 +129,7 @@ func GenerateReport(namespace string) error {
 
 	nodes, err := getNodeList()
 	if err != nil {
-		log.Printf("Error getting node list. Error %v", err)
+		log.Printf("Error getting node list. Skipping. Error: %v", err)
 	} else {
 		for _, node := range nodes.Nodes {
 			// get more specific
@@ -143,6 +144,17 @@ func GenerateReport(namespace string) error {
 			events := formatEventListArray(nodeInfo.EventList)
 			// TODO: IMPLEMENT NODE PRESSURE INFO
 			addNodePage(pdf, nodePageId, node.ObjectMeta.Name, labels, taints, nodeInfo.NodeInfo.OSImage, internalIps, !nodeInfo.Unschedulable, false, false, false, false, string(nodeInfo.Ready), events)
+		}
+	}
+
+	pvcList, err := getPvcDetail(namespace)
+	if err != nil {
+		log.Printf("Error getting pvc list. Skipping. Error: %v", err)
+	} else {
+		for _, pvc := range pvcList.Items {
+			log.Printf("pvc detail gotten, %v", pvc)
+			labels := formatLabelString(pvc.ObjectMeta.Labels)
+			addPvcPage(pdf, pvcPageId, pvc.ObjectMeta.Name, pvc.Status, *pvc.StorageClass, pvc.Volume, labels, fmt.Sprint(pvc.Capacity.Storage()), []string{"tbi"})
 		}
 	}
 
@@ -320,6 +332,27 @@ func getNodeDetail(nodeName string) (nodeDetail node.NodeDetail, err error) {
 	}
 
 	return nodeDetails, nil
+}
+func getPvcDetail(namespace string) (claimList persistentvolumeclaim.PersistentVolumeClaimList, err error) {
+	resp, err := getHttp("persistentvolumeclaim/" + namespace)
+	if err != nil {
+		log.Printf("Error getting pvc list for namespace %s, error: %v", namespace, err)
+		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
+	}
+	bodyBytes, err := parseHtmlToBytes(resp)
+	if err != nil {
+		log.Printf("Error parsing html of pvc list in namespace %s, error: %v", namespace, err)
+		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
+	}
+
+	var pvcList persistentvolumeclaim.PersistentVolumeClaimList = persistentvolumeclaim.PersistentVolumeClaimList{}
+	err = json.Unmarshal(bodyBytes, &pvcList)
+	if err != nil {
+		log.Printf("Error parsing json of pvc list in namespace %s, error: %v", namespace, err)
+		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
+	}
+
+	return pvcList, nil
 }
 func getProtocol() string {
 	if Secure {
