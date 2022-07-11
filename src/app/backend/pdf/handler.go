@@ -134,7 +134,7 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 			To(genPdf).
 			Writes(pdfRequestStatus{}))
 
-	log.Print("pdf api handler initialized.")
+	log.Print("PDF API handler initialized.")
 
 	return wsContainer, nil
 }
