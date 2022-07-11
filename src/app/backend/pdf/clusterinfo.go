@@ -21,6 +21,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/logs"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/node"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
@@ -68,6 +69,48 @@ func getPodLogs(namespace string, pod string) (response logs.LogDetails, err err
 	}
 
 	return logDetails, nil
+}
+func getPodEvents(namespace string, pod string) (response common.EventList, err error) {
+	resp, err := getHttp("pod/" + namespace + "/" + pod + "/event")
+	if err != nil {
+		log.Printf("Error getting pod events in namespace %s for pod %s, error: %v", namespace, pod, err)
+		return common.EventList{}, err
+	}
+	bodyBytes, err := parseHtmlToBytes(resp)
+	if err != nil {
+		log.Printf("Error parsing html of pod events in namespace %s for pod %s, error: %v", namespace, pod, err)
+		return common.EventList{}, err
+	}
+
+	var events common.EventList = common.EventList{}
+	err = json.Unmarshal(bodyBytes, &events)
+	if err != nil {
+		log.Printf("Error parsing json of pod logs in namespace %s for pod %s, error: %v", namespace, pod, err)
+		return common.EventList{}, err
+	}
+
+	return events, nil
+}
+func getPodPvc(namespace string, pod string) (response persistentvolumeclaim.PersistentVolumeClaimList, err error) {
+	resp, err := getHttp("pod/" + namespace + "/" + pod + "/persistentvolumeclaim")
+	if err != nil {
+		log.Printf("Error getting pod pvc in namespace %s for pod %s, error: %v", namespace, pod, err)
+		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
+	}
+	bodyBytes, err := parseHtmlToBytes(resp)
+	if err != nil {
+		log.Printf("Error parsing html of pod pvc in namespace %s for pod %s, error: %v", namespace, pod, err)
+		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
+	}
+
+	var pvcList persistentvolumeclaim.PersistentVolumeClaimList = persistentvolumeclaim.PersistentVolumeClaimList{}
+	err = json.Unmarshal(bodyBytes, &pvcList)
+	if err != nil {
+		log.Printf("Error parsing json of pod pvc in namespace %s for pod %s, error: %v", namespace, pod, err)
+		return persistentvolumeclaim.PersistentVolumeClaimList{}, err
+	}
+
+	return pvcList, nil
 }
 func getNodeList() (nodes node.NodeList, err error) {
 	resp, err := getHttp("node")
@@ -132,6 +175,8 @@ func getPvcDetail(namespace string) (claimList persistentvolumeclaim.PersistentV
 
 	return pvcList, nil
 }
+
+// Helper http/s functions
 func getProtocol() string {
 	if Secure {
 		return "https://"

@@ -105,8 +105,20 @@ func GenerateHealthCheckReport(namespace string) error {
 				logArr[i] = string(value.Timestamp) + "---" + value.Content
 			}
 
-			// TODO: IMPLEMENT TAINT, PVC, EVENTS
-			addPodDetailPage(pdf, podDetailPageId, pod.ObjectMeta.Name, labels, "tbi", pod.ContainerImages, "tbi", pod.NodeName, []string{"tbi"})
+			events, err := getPodEvents(namespace, pod.ObjectMeta.Name)
+			if err != nil {
+				log.Printf("Error getting events for pod %s in namespace %s. Error: %v", pod.ObjectMeta.Name, namespace, err)
+			}
+			log.Printf("Pod events gotten: %v", events.Events)
+
+			pvc, err := getPodPvc(namespace, pod.ObjectMeta.Name)
+			if err != nil {
+				log.Printf("Error getting pvc for pod %s in namespace %s. Error: %v", pod.ObjectMeta.Name, namespace, err)
+			}
+			log.Printf("Pod pvc gotten: %v", pvc.Items)
+
+			// TODO: IMPLEMENT TAINT
+			addPodDetailPage(pdf, podDetailPageId, pod.ObjectMeta.Name, labels, "tbi", pod.ContainerImages, formatSimplePvcList(pvc.Items), pod.NodeName, formatEventListArray(events))
 			addPodLogsPage(pdf, podLogsPageId, pod.ObjectMeta.Name, logArr)
 		}
 	}
@@ -159,6 +171,7 @@ func GenerateHealthCheckReport(namespace string) error {
 		for _, pvc := range pvcList.Items {
 			log.Printf("pvc detail gotten, %v", pvc)
 			labels := formatLabelString(pvc.ObjectMeta.Labels)
+			// TODO: implement events
 			addPvcPage(pdf, pvcPageId, pvc.ObjectMeta.Name, pvc.Status, *pvc.StorageClass, pvc.Volume, labels, fmt.Sprint(pvc.Capacity.Storage()), []string{"tbi"})
 		}
 	}

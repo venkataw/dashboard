@@ -16,6 +16,7 @@ package pdf
 
 import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -63,4 +64,15 @@ func formatEventListArray(events common.EventList) []string {
 		return []string{"No events"}
 	}
 	return eventArr
+}
+func formatSimplePvcList(pvcList []persistentvolumeclaim.PersistentVolumeClaim) string {
+	var formatted string = ""
+	if len(pvcList) == 0 {
+		return "No PVCs associated with this pod"
+	}
+	for _, pvc := range pvcList {
+		formatted += pvc.ObjectMeta.Name + ", "
+	}
+	formatted = formatted[0 : len(formatted)-2]
+	return formatted
 }
