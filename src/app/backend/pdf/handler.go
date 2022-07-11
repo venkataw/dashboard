@@ -90,9 +90,13 @@ func genPdf(request *restful.Request, response *restful.Response) {
 func genTestPdf(request *restful.Request, response *restful.Response) {
 	log.Printf("Got request to generate a TEST pdf. Request: %v", request)
 
-	GenerateTestReport()
+	err := GenerateTestReport()
 
-	response.WriteHeader(http.StatusOK)
+	if err != nil {
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfRequestStatus{Status: "error", ErrorMessage: fmt.Sprint(err)})
+	} else {
+		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok"})
+	}
 }
 
 func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
