@@ -16,6 +16,7 @@ package pdf
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -23,6 +24,7 @@ import (
 
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/logs"
+	ns "github.com/kubernetes/dashboard/src/app/backend/resource/namespace"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/node"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/pod"
@@ -174,6 +176,30 @@ func getPvcDetail(namespace string) (claimList persistentvolumeclaim.PersistentV
 	}
 
 	return pvcList, nil
+}
+func namespaceExists(namespace string) (nsExists bool, err error) {
+	resp, err := getHttp("namespace/")
+	if err != nil {
+		log.Printf("Error getting namespace list, error: %v", err)
+		return false, err
+	}
+	bodyBytes, err := parseHtmlToBytes(resp)
+	if err != nil {
+		log.Printf("Error parsing html of namespace list, error: %v", err)
+		return false, err
+	}
+	var namespaces ns.NamespaceList = ns.NamespaceList{}
+	err = json.Unmarshal(bodyBytes, &namespaces)
+	if err != nil {
+		log.Printf("Error parsing json of namespace list, error: %v", err)
+		return false, err
+	}
+	for _, ns := range namespaces.Namespaces {
+		if ns.ObjectMeta.Name == namespace {
+			return true, nil
+		}
+	}
+	return false, errors.New("Could not find namespace " + namespace)
 }
 
 // Helper http/s functions

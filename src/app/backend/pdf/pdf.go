@@ -15,6 +15,7 @@
 package pdf
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -70,11 +71,16 @@ const (
 )
 
 func GenerateHealthCheckReport(namespace string) error {
+	// Check if namespace exists first
+	exists, _ := namespaceExists(namespace)
+	if !exists {
+		log.Printf("Namespace %s doesn't exist, cannot create health check report.", namespace)
+		return errors.New("Namespace " + namespace + " doesn't exist")
+	}
+
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 12)
-
-	// TODO: check if namespace exists
 
 	// import templates
 	importer = gofpdi.NewImporter()
@@ -117,7 +123,8 @@ func GenerateHealthCheckReport(namespace string) error {
 			}
 			log.Printf("Pod pvc gotten: %v", pvc.Items)
 
-			// TODO: IMPLEMENT TAINT
+			// TODO: Implement pod taint
+			// problem: not directly available via pod API. Maybe use Node api and try to match?
 			addPodDetailPage(pdf, podDetailPageId, pod.ObjectMeta.Name, labels, "tbi", pod.ContainerImages, formatSimplePvcList(pvc.Items), pod.NodeName, formatEventListArray(events))
 			addPodLogsPage(pdf, podLogsPageId, pod.ObjectMeta.Name, logArr)
 		}
@@ -159,7 +166,8 @@ func GenerateHealthCheckReport(namespace string) error {
 				}
 			}
 			networkUnavailable = "tbi"
-			// TODO: IMPLEMENT NETWORKUNAVAILABLE
+			// TODO: Implement NetworkUnavailable
+			// problem: how to get?
 			addNodePage(pdf, nodePageId, node.ObjectMeta.Name, labels, taints, nodeInfo.NodeInfo.OSImage, internalIps, !nodeInfo.Unschedulable, networkUnavailable, memoryPressure, diskPressure, pidPressure, ready, events)
 		}
 	}
@@ -171,7 +179,8 @@ func GenerateHealthCheckReport(namespace string) error {
 		for _, pvc := range pvcList.Items {
 			log.Printf("pvc detail gotten, %v", pvc)
 			labels := formatLabelString(pvc.ObjectMeta.Labels)
-			// TODO: implement events
+			// TODO: Implement PVC events
+			// Problem: not available to API
 			addPvcPage(pdf, pvcPageId, pvc.ObjectMeta.Name, pvc.Status, *pvc.StorageClass, pvc.Volume, labels, fmt.Sprint(pvc.Capacity.Storage()), []string{"tbi"})
 		}
 	}
