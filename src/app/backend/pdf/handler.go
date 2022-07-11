@@ -16,6 +16,7 @@ package pdf
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -28,6 +29,10 @@ type pdfDetail struct {
 }
 type pdfContent struct {
 	Contents []byte `json:"contents"`
+}
+type pdfRequestStatus struct {
+	Status       string `json:"status"`
+	ErrorMessage string `json:"error"`
 }
 
 var (
@@ -66,14 +71,20 @@ func getPdf(request *restful.Request, response *restful.Response) {
 	}
 }
 
+// Feedback for pdf generation (pdf generated = OK, some error = 500 + message)
+// TODO: 500 error might be problematic for frontend; check back later
 func genPdf(request *restful.Request, response *restful.Response) {
 	log.Printf("Got request to generate a pdf. Request: %v", request)
 	namespace := request.PathParameter("namespace")
 	log.Printf("Want from namespace: %v", namespace)
 
-	GenerateHealthCheckReport(namespace)
+	err := GenerateHealthCheckReport(namespace)
 
-	response.WriteHeader(http.StatusOK)
+	if err != nil {
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfRequestStatus{Status: "error", ErrorMessage: fmt.Sprint(err)})
+	} else {
+		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok"})
+	}
 }
 
 func genTestPdf(request *restful.Request, response *restful.Response) {
@@ -112,10 +123,12 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 			Writes(pdfContent{}))
 	pdfApiWs.Route(
 		pdfApiWs.GET("/gen").
-			To(genTestPdf))
+			To(genTestPdf).
+			Writes(pdfRequestStatus{}))
 	pdfApiWs.Route(
 		pdfApiWs.GET("/gen/{namespace}").
-			To(genPdf))
+			To(genPdf).
+			Writes(pdfRequestStatus{}))
 
 	log.Print("pdf api handler initialized.")
 
