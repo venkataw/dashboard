@@ -171,6 +171,12 @@ const routes: Routes = [
         loadChildren: () => import('crd/module').then(m => m.CrdModule),
       },
 
+      // Reports
+      {
+        path: 'reports',
+        loadChildren: () => import('pdf/module').then(m => m.PdfModule),
+      },
+
       // Others
       {
         path: 'settings',
