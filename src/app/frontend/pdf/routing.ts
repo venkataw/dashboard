@@ -13,14 +13,21 @@
 // limitations under the License.
 
 import {NgModule} from '@angular/core';
-
-import {ComponentsModule} from '@common/components/module';
-import {SharedModule} from '../shared.module';
+import {Route, RouterModule} from '@angular/router';
+import {BREADCRUMBS} from '../index.messages';
 import {ReportComponent} from './component';
-import {ReportsRoutingComponent} from './routing';
+
+export const REPORTS_ROUTE: Route = {
+  path: '',
+  component: ReportComponent,
+  data: {
+    breadcrumb: BREADCRUMBS.Reports,
+    link: ['', 'reports'],
+  },
+};
 
 @NgModule({
-  imports: [SharedModule, ComponentsModule, ReportsRoutingComponent],
-  declarations: [ReportComponent],
+  imports: [RouterModule.forChild([REPORTS_ROUTE])],
+  exports: [RouterModule],
 })
-export class PdfModule {}
+export class ReportsRoutingComponent {}

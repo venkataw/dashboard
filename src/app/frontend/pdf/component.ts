@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {NgModule} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 
-import {ComponentsModule} from '@common/components/module';
-import {SharedModule} from '../shared.module';
-import {ReportComponent} from './component';
-import {ReportsRoutingComponent} from './routing';
-
-@NgModule({
-  imports: [SharedModule, ComponentsModule, ReportsRoutingComponent],
-  declarations: [ReportComponent],
+@Component({
+  selector: 'kd-report-list',
+  templateUrl: './template.html',
+  //styleUrls: ['style.scss'],
 })
-export class PdfModule {}
+export class ReportComponent implements OnInit, OnDestroy {
+  ngOnInit(): void {
+    console.log('I have been initialized! kd-report-list');
+  }
+  ngOnDestroy(): void {
+    console.log('I have been destroyed! kd-report-list');
+  }
+}

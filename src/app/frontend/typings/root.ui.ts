@@ -209,6 +209,7 @@ export enum IBreadcrumbMessageKey {
   CustomResourceDefinitions = 'CustomResourceDefinitions',
   Settings = 'Settings',
   About = 'About',
+  Reports = 'Reports',
 }
 
 export type IBreadcrumbMessage = {
