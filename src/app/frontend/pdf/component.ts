@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ReportService} from './client';
 
 @Component({
   selector: 'kd-report-list',
@@ -21,9 +22,15 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 })
 export class ReportComponent implements OnInit, OnDestroy {
   isInitialized = false;
+  pdfList: string[] = [];
+
+  constructor(private readonly reportService_: ReportService) {}
 
   ngOnInit(): void {
     setTimeout(() => {
+      this.pdfList = this.reportService_.getList();
+      console.log(this.pdfList);
+
       this.isInitialized = true;
       console.log('I have been initialized! kd-report-list');
     }, 1000);

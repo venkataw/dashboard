@@ -20,6 +20,9 @@ limitations under the License.
 
   <div content
        *ngIf="isInitialized">
-    <span>Testing! If you see this, this has been initialized.</span>
+    <span>Testing! If you see this, the reports section has been initialized.</span>
+    <li *ngFor="let item of pdfList; index as i">
+      {{i}}: {{item}}
+    </li>
   </div>
 </kd-card>

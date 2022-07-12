@@ -180,6 +180,7 @@ func main() {
 	http.Handle("/pdf/", pdfHandler)
 
 	// TEMP!! EXPORT TEST PDF
+	// TODO: delete this when pdf system is ready
 	pdferr := pdf.GenerateTestReport()
 	log.Print("Test template pdf exported to " + pdf.ReportDir)
 	log.Print(pdferr)

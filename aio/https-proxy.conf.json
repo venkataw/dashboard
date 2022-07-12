@@ -10,5 +10,11 @@
     "secure": false,
     "ws": true,
     "changeOrigin": true
+  },
+  "/pdf": {
+    "target": "https://localhost:8443",
+    "secure": false,
+    "ws": true,
+    "changeOrigin": true
   }
 }
