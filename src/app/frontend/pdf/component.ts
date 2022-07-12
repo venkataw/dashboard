@@ -20,8 +20,13 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
   //styleUrls: ['style.scss'],
 })
 export class ReportComponent implements OnInit, OnDestroy {
+  isInitialized = false;
+
   ngOnInit(): void {
-    console.log('I have been initialized! kd-report-list');
+    setTimeout(() => {
+      this.isInitialized = true;
+      console.log('I have been initialized! kd-report-list');
+    }, 1000);
   }
   ngOnDestroy(): void {
     console.log('I have been destroyed! kd-report-list');

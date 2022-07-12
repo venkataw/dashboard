@@ -14,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div>
-  <p>Hi! Testing pdf report list.</p>
-</div>
+<kd-card [initialized]="isInitialized">
+  <div title
+       i18n>Reports</div>
+
+  <div content
+       *ngIf="isInitialized">
+    <span>Testing! If you see this, this has been initialized.</span>
+  </div>
+</kd-card>
