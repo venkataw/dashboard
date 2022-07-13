@@ -27,7 +27,9 @@ limitations under the License.
         <th mat-header-cell
             *matHeaderCellDef>Name</th>
         <td mat-cell
-            *matCellDef="let element"><mat-icon>file_download</mat-icon>{{element.name}}</td>
+            *matCellDef="let element">
+          <mat-icon>file_download</mat-icon>{{element.name}}
+        </td>
       </ng-container>
       <tr mat-header-row
           *matHeaderRowDef="colList"></tr>
