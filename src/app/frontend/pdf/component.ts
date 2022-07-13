@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, ViewChild, OnDestroy, OnInit} from '@angular/core';
+import {MatTable} from '@angular/material/table';
 import {ReportService} from './client';
+import {ReportItem} from './reporttypes';
+
+const UPDATE_INTERVAL = 10000; // how often to request a new report list from the api server
 
 @Component({
   selector: 'kd-report-list',
@@ -22,20 +26,53 @@ import {ReportService} from './client';
 })
 export class ReportComponent implements OnInit, OnDestroy {
   isInitialized = false;
-  pdfList: string[] = [];
+  pdfList: ReportItem[] = [];
+  colList = ['name'];
+
+  updateInterval: NodeJS.Timer;
+
+  @ViewChild(MatTable) table: MatTable<ReportItem[]>;
 
   constructor(private readonly reportService_: ReportService) {}
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.pdfList = this.reportService_.getList();
-      console.log(this.pdfList);
+    const listObservable = this.reportService_.getList();
+    const listObserver = {
+      next: (x: ReportItem[]) => (this.pdfList = x),
+      error: (err: Error) => console.error('Error getting report list: ' + err),
+      complete: () => {
+        console.log('Done getting list');
+        this.isInitialized = true;
+        console.log('I have been initialized! kd-report-list');
+        console.log(this.pdfList);
+      },
+    };
+    listObservable.subscribe(listObserver);
 
-      this.isInitialized = true;
-      console.log('I have been initialized! kd-report-list');
-    }, 1000);
+    this.updateInterval = setInterval(() => {
+      this.updateTable();
+    }, UPDATE_INTERVAL);
   }
   ngOnDestroy(): void {
+    clearInterval(this.updateInterval);
     console.log('I have been destroyed! kd-report-list');
+  }
+
+  downloadPdf(row: any): void {
+    console.log(row);
+  }
+
+  updateTable(): void {
+    const listObservable = this.reportService_.getList();
+    const listObserver = {
+      next: (x: ReportItem[]) => (this.pdfList = x),
+      error: (err: Error) => console.error('Error getting report list: ' + err),
+      complete: () => {
+        console.log('Table updated.');
+        console.log(this.pdfList);
+        this.table.renderRows();
+      },
+    };
+    listObservable.subscribe(listObserver);
   }
 }

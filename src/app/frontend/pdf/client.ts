@@ -14,8 +14,7 @@
 
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-
-import {ReportItem} from './reporttypes';
+import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -27,21 +26,7 @@ export class ReportService {
     this.http_ = http;
   }
 
-  getList(): string[] {
-    const pdfList: string[] = [];
-    const listObservable = this.http_.request('GET', 'pdf');
-    const listObserver = {
-      next: (x: ReportItem[]) => {
-        for (const item of x) {
-          pdfList.push(item.name);
-        }
-        return pdfList;
-      },
-      error: (err: Error) => console.error('GETting report list error: ' + err),
-      //complete: () => console.log('Observer got a complete notification'),
-    };
-    listObservable.subscribe(listObserver);
-
-    return pdfList;
+  getList(): Observable<Object> {
+    return this.http_.get('pdf');
   }
 }
