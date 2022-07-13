@@ -63,7 +63,7 @@ func getPdf(request *restful.Request, response *restful.Response) {
 
 	content, err := os.ReadFile(ReportDir + "/" + pdfname)
 	if errors.Is(err, os.ErrNotExist) {
-		response.WriteHeaderAndEntity(http.StatusOK, pdfContent{Contents: nil})
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfContent{Contents: nil})
 	} else if err != nil {
 		panic(err)
 	} else {

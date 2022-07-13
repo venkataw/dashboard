@@ -27,7 +27,7 @@ limitations under the License.
         <th mat-header-cell
             *matHeaderCellDef>Name</th>
         <td mat-cell
-            *matCellDef="let element">{{element.name}}</td>
+            *matCellDef="let element"><mat-icon>file_download</mat-icon>{{element.name}}</td>
       </ng-container>
       <tr mat-header-row
           *matHeaderRowDef="colList"></tr>
@@ -35,8 +35,5 @@ limitations under the License.
           (click)="downloadPdf(row)"
           *matRowDef="let row; columns: colList;"></tr>
     </table>
-    <!-- <li *ngFor="let item of pdfList; index as i">
-      {{i}}: {{item}}
-    </li> -->
   </div>
 </kd-card>

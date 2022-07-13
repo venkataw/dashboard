@@ -15,3 +15,9 @@
 export interface ReportItem {
   name: string;
 }
+
+export interface ReportContents {
+  //contents: Uint8Array;
+  contents: string;
+  //contents: Uint16Array;
+}
