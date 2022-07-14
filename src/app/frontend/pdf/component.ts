@@ -36,6 +36,9 @@ export class ReportComponent implements OnInit, OnDestroy {
   colList = ['name'];
   @ViewChild(MatTable) table: MatTable<ReportItem[]>;
 
+  // dropdown for template selection
+  selectedTemplate: string;
+
   constructor(private readonly reportService_: ReportService) {}
 
   ngOnInit(): void {
@@ -148,5 +151,14 @@ export class ReportComponent implements OnInit, OnDestroy {
       },
     };
     listObservable.subscribe(listObserver);
+  }
+
+  genPdf(): void {
+    // TODO: add snackbar for feedback
+    if (this.selectedTemplate) {
+      console.log('Requesting generation of template ' + this.selectedTemplate);
+    } else {
+      console.log('Need to select a template first.');
+    }
   }
 }
