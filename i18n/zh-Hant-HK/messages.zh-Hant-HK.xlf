@@ -1272,6 +1272,10 @@
           <context context-type="linenumber">29</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/workloads/deployment/detail/template.html</context>
           <context context-type="linenumber">224</context>
         </context-group>
@@ -4107,7 +4111,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">38</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4814940703935231049" datatype="html">
@@ -6623,6 +6627,30 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/settings/local/template.html</context>
           <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8409544799262519924" datatype="html">
+        <source>Manage Reports</source>
+        <target state="new">Manage Reports</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5610425955750546094" datatype="html">
+        <source>Template</source>
+        <target state="new">Template</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5896009741331779309" datatype="html">
+        <source>Generate Selected Report</source>
+        <target state="new">Generate Selected Report</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">32</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2634769168106360285" datatype="html">
