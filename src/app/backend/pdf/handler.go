@@ -148,7 +148,11 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 			To(genTestPdf).
 			Writes(pdfRequestStatus{}))
 	pdfApiWs.Route(
-		pdfApiWs.GET("/gen/{namespace}").
+		pdfApiWs.GET("/gen/test").
+			To(genTestPdf).
+			Writes(pdfRequestStatus{}))
+	pdfApiWs.Route(
+		pdfApiWs.GET("/gen/healthcheck/{namespace}").
 			To(genHealthCheckPdf).
 			Writes(pdfRequestStatus{}))
 
