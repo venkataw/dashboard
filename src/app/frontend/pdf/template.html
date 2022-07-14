@@ -23,13 +23,16 @@ limitations under the License.
     <mat-form-field appearance="fill">
       <mat-label i18n>Template</mat-label>
       <mat-select [(value)]="selectedTemplate">
-        <mat-option *ngFor="let template of templateList" [value]="template.name">
+        <mat-option *ngFor="let template of templateList"
+                    [value]="template.name">
           {{template.displayname}}
         </mat-option>
       </mat-select>
     </mat-form-field>
     <br>
-    <button mat-raised-button i18n (click)="genPdf()">Generate Selected Report</button>
+    <button mat-raised-button
+            i18n
+            (click)="genPdf()">Generate Selected Report</button>
   </div>
 </kd-card>
 
