@@ -88,9 +88,8 @@ func getTemplates(request *restful.Request, response *restful.Response) {
 // Feedback for pdf generation (pdf generated = OK, some error = 500 + message)
 // TODO: 500 error might be problematic for frontend; check back later
 func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
-	log.Printf("Got request to generate a pdf. Request: %v", request)
 	namespace := request.PathParameter("namespace")
-	log.Printf("Want from namespace: %v", namespace)
+	log.Printf("Generating health check pdf for %v...", namespace)
 
 	err := GenerateHealthCheckReport(namespace)
 
@@ -102,7 +101,7 @@ func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 }
 
 func genTestPdf(request *restful.Request, response *restful.Response) {
-	log.Printf("Got request to generate a TEST pdf. Request: %v", request)
+	log.Printf("Generating test pdf...")
 
 	err := GenerateTestReport()
 
@@ -114,8 +113,6 @@ func genTestPdf(request *restful.Request, response *restful.Response) {
 }
 
 func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
-	log.Print("Initializing pdf api handler...")
-
 	ApiPort = port
 	Secure = isSecure
 

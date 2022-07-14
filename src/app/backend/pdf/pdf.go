@@ -98,8 +98,6 @@ func GenerateHealthCheckReport(namespace string) error {
 		log.Printf("Error getting pod detail. Skipping. Error: %v", err)
 	} else {
 		for _, pod := range resp.Pods {
-			log.Printf("Pod detail gotten: %v", pod)
-
 			labels := formatLabelString(pod.ObjectMeta.Labels)
 			logDetail, err := getPodLogs(namespace, pod.ObjectMeta.Name)
 			if err != nil {
@@ -115,13 +113,11 @@ func GenerateHealthCheckReport(namespace string) error {
 			if err != nil {
 				log.Printf("Error getting events for pod %s in namespace %s. Error: %v", pod.ObjectMeta.Name, namespace, err)
 			}
-			log.Printf("Pod events gotten: %v", events.Events)
 
 			pvc, err := getPodPvc(namespace, pod.ObjectMeta.Name)
 			if err != nil {
 				log.Printf("Error getting pvc for pod %s in namespace %s. Error: %v", pod.ObjectMeta.Name, namespace, err)
 			}
-			log.Printf("Pod pvc gotten: %v", pvc.Items)
 
 			// TODO: Implement pod taint
 			// problem: not directly available via pod API. Maybe use Node api and try to match?
@@ -140,7 +136,6 @@ func GenerateHealthCheckReport(namespace string) error {
 			if err != nil {
 				log.Printf("Error getting more specific node detail for %s, skipping. Error: %v", node.ObjectMeta.Name, err)
 			}
-			log.Printf("node detail gotten: %v", nodeInfo)
 			labels := formatLabelString(node.ObjectMeta.Labels)
 			taints := formatTaintString(nodeInfo.Taints)
 			internalIps := formatInternalIpString(nodeInfo.Addresses)
@@ -177,7 +172,6 @@ func GenerateHealthCheckReport(namespace string) error {
 		log.Printf("Error getting pvc list. Skipping. Error: %v", err)
 	} else {
 		for _, pvc := range pvcList.Items {
-			log.Printf("pvc detail gotten, %v", pvc)
 			labels := formatLabelString(pvc.ObjectMeta.Labels)
 			// TODO: Implement PVC events
 			// Problem: not available to API

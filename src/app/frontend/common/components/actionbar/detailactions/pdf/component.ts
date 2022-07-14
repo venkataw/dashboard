@@ -83,7 +83,6 @@ export class ActionbarDetailExportpdfComponent {
       this.containers = ExportPdfComponent.curContainers;
       this.containerName = this.containers[0].name; //TODO: FIX THIS (support for all containers in different pages)
     } else {
-      console.log('No logs available for type ' + ExportPdfComponent.curResourceType + ', skipping logs collection');
       this.namespace = undefined;
       this.resourceType = undefined;
       this.resourceName = undefined;
@@ -91,23 +90,10 @@ export class ActionbarDetailExportpdfComponent {
     }
 
     this.logService = logService;
-
-    console.log('Got details in constructor');
-    console.log(this.namespace);
-    console.log(this.resourceType);
-    console.log(this.resourceName);
-    console.log(this.containerName);
   }
 
   onClick(): void {
     const searchElement = ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind);
-    const dryRun = false;
-
-    console.log('Got details in onclick()');
-    console.log(this.namespace);
-    console.log(this.resourceType);
-    console.log(this.resourceName);
-    console.log(this.containerName);
 
     if (this.namespace && this.resourceType && this.resourceName && this.containerName) {
       this.logService
@@ -124,16 +110,11 @@ export class ActionbarDetailExportpdfComponent {
         .pipe(take(1))
         .subscribe(data => {
           // finished loading
-          console.log('Finished loading. logdetail is:');
-          console.log(data);
           this.logsSnapshot = data;
         });
     }
 
-    if (dryRun) return;
-
-    if (searchElement !== null && searchElement !== undefined) {
-      console.log('Generating pdf, typeMeta.kind is ' + this.typeMeta.kind + ', mapped is ' + searchElement);
+    if (searchElement) {
       ActionbarDetailExportpdfComponent.currentSnackbar = this.matSnackBar_.open('Generating pdf...', 'Dismiss');
       this.generatePdf(ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind));
     } else {
@@ -171,7 +152,7 @@ export class ActionbarDetailExportpdfComponent {
   }
 
   pdfExportCallback(pdf: jsPDF): void {
-    if (this.logsSnapshot !== null && this.logsSnapshot !== undefined) {
+    if (this.logsSnapshot) {
       // add logs section
       pdf.addPage();
       pdf.setFontSize(56);
@@ -193,8 +174,6 @@ export class ActionbarDetailExportpdfComponent {
         pdf.text(splitText, 245, pageY);
         i += splitText.length;
       }
-    } else {
-      console.log('logsSnapshot is null, skipping logs section');
     }
     pdf.save(
       'Report-' + this.objectMeta.name + '-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.pdf'
