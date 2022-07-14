@@ -15,7 +15,7 @@
 import {Component, ViewChild, OnDestroy, OnInit} from '@angular/core';
 import {MatTable} from '@angular/material/table';
 import {ReportService} from './client';
-import {PdfTemplate, ReportContents, ReportItem} from './reporttypes';
+import {PdfRequestStatus, PdfTemplate, ReportContents, ReportItem} from './reporttypes';
 
 const UPDATE_INTERVAL = 5000; // how often to request a new report list from the api server (in ms)
 
@@ -154,11 +154,25 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   genPdf(): void {
-    // TODO: add snackbar for feedback
     if (this.selectedTemplate) {
+      // TODO: add snackbar for feedback
       console.log('Requesting generation of template ' + this.selectedTemplate);
+      // send request and get status back
+      const templateObservable = this.reportService_.genPdf(this.selectedTemplate, 'gabrian'); // TODO: add dropdown for namespace
+      const templateObserver = {
+        next: (x: PdfRequestStatus) => {
+          if (x.status === 'ok') {
+            console.log('report generated!');
+            this.updateTable(); // TODO: snackbar feedback
+          } else {
+            console.error('Error generating pdf: ' + x.error); // TODO: add snackbar feedback
+          }
+        },
+        error: (err: Error) => console.error('Error sending request to generate pdf: ' + err),
+      };
+      templateObservable.subscribe(templateObserver);
     } else {
-      console.log('Need to select a template first.');
+      console.log('Need to select a template first.'); // TODO: add snackbar feedback
     }
   }
 }
