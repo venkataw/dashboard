@@ -15,7 +15,7 @@
 import {Component, ViewChild, OnDestroy, OnInit} from '@angular/core';
 import {MatTable} from '@angular/material/table';
 import {ReportService} from './client';
-import {ReportContents, ReportItem} from './reporttypes';
+import {PdfTemplate, ReportContents, ReportItem} from './reporttypes';
 
 const UPDATE_INTERVAL = 5000; // how often to request a new report list from the api server (in ms)
 
@@ -25,28 +25,45 @@ const UPDATE_INTERVAL = 5000; // how often to request a new report list from the
   //styleUrls: ['style.scss'],
 })
 export class ReportComponent implements OnInit, OnDestroy {
-  isInitialized = false;
+  reportListInitialized = false;
+  templateListInitialized = false;
+  isInitialized = false; // final initialization (ready to render)
   pdfList: ReportItem[] = [];
-  colList = ['name'];
-
+  templateList: PdfTemplate[] = [];
   updateInterval: NodeJS.Timer;
 
+  // table with report list
+  colList = ['name'];
   @ViewChild(MatTable) table: MatTable<ReportItem[]>;
 
   constructor(private readonly reportService_: ReportService) {}
 
   ngOnInit(): void {
+    // get report list
     const listObservable = this.reportService_.getList();
     const listObserver = {
       next: (x: ReportItem[]) => (this.pdfList = x),
       error: (err: Error) => console.error('Error getting report list: ' + err),
       complete: () => {
-        this.isInitialized = true;
-        console.log('I have been initialized! kd-report-list');
+        this.finishInit(true, false);
+        console.log('Report list initialized!');
         console.log(this.pdfList);
       },
     };
     listObservable.subscribe(listObserver);
+
+    // get template list
+    const templateObservable = this.reportService_.getTemplates();
+    const templateObserver = {
+      next: (x: PdfTemplate[]) => (this.templateList = x),
+      error: (err: Error) => console.error('Error getting template list: ' + err),
+      complete: () => {
+        this.finishInit(false, true);
+        console.log('Template list initialized!');
+        console.log(this.templateList);
+      },
+    };
+    templateObservable.subscribe(templateObserver);
 
     // Update the table once in a while
     this.updateInterval = setInterval(() => {
@@ -56,6 +73,20 @@ export class ReportComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearInterval(this.updateInterval);
     console.log('I have been destroyed! kd-report-list');
+  }
+
+  finishInit(reportListDone = false, templateListDone = false) {
+    if (reportListDone) {
+      this.reportListInitialized = true;
+    }
+    if (templateListDone) {
+      this.templateListInitialized = true;
+    }
+    if (this.reportListInitialized && this.templateListInitialized) {
+      // done initializing.
+      console.log('kd-report-list initialized!');
+      this.isInitialized = true;
+    }
   }
 
   downloadPdf(row: ReportItem): void {

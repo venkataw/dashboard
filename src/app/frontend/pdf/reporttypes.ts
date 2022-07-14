@@ -17,7 +17,10 @@ export interface ReportItem {
 }
 
 export interface ReportContents {
-  //contents: Uint8Array;
-  contents: string;
-  //contents: Uint16Array;
+  contents: string; // a base64 representation of the pdf file contents
+}
+
+export interface PdfTemplate {
+  name: string;
+  displayname: string;
 }

@@ -34,11 +34,20 @@ type pdfRequestStatus struct {
 	Status       string `json:"status"`
 	ErrorMessage string `json:"error"`
 }
+type pdfTemplate struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"displayname"`
+}
 
 var (
 	ApiPort = 9090
 	Secure  = false
 )
+
+var templateList []pdfTemplate = []pdfTemplate{
+	{"healthcheck", "Health Check Report"},
+	{"test", "Test Report"},
+}
 
 func getPdfList(request *restful.Request, response *restful.Response) {
 	log.Printf("Got request for pdf list. Request: %v", request)
@@ -71,9 +80,14 @@ func getPdf(request *restful.Request, response *restful.Response) {
 	}
 }
 
+func getTemplates(request *restful.Request, response *restful.Response) {
+	log.Print("Sending template list")
+	response.WriteHeaderAndEntity(http.StatusOK, templateList)
+}
+
 // Feedback for pdf generation (pdf generated = OK, some error = 500 + message)
 // TODO: 500 error might be problematic for frontend; check back later
-func genPdf(request *restful.Request, response *restful.Response) {
+func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 	log.Printf("Got request to generate a pdf. Request: %v", request)
 	namespace := request.PathParameter("namespace")
 	log.Printf("Want from namespace: %v", namespace)
@@ -126,12 +140,16 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 			To(getPdf).
 			Writes(pdfContent{}))
 	pdfApiWs.Route(
+		pdfApiWs.GET("/templates").
+			To(getTemplates).
+			Writes([]pdfTemplate{}))
+	pdfApiWs.Route(
 		pdfApiWs.GET("/gen").
 			To(genTestPdf).
 			Writes(pdfRequestStatus{}))
 	pdfApiWs.Route(
 		pdfApiWs.GET("/gen/{namespace}").
-			To(genPdf).
+			To(genHealthCheckPdf).
 			Writes(pdfRequestStatus{}))
 
 	log.Print("PDF API handler initialized.")

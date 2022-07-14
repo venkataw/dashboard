@@ -33,4 +33,8 @@ export class ReportService {
   getPdf(name: string): Observable<Object> {
     return this.http_.get('pdf/pdf/' + name);
   }
+
+  getTemplates(): Observable<Object> {
+    return this.http_.get('pdf/templates');
+  }
 }
