@@ -20,12 +20,22 @@ limitations under the License.
 
   <div content
        *ngIf="isInitialized">
+    <span i18n>Generate Report</span>
     <mat-form-field appearance="fill">
       <mat-label i18n>Template</mat-label>
       <mat-select [(value)]="selectedTemplate">
         <mat-option *ngFor="let template of templateList"
                     [value]="template.name">
           {{template.displayname}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label i18n>Namepace</mat-label>
+      <mat-select [(value)]="selectedNamespace">
+        <mat-option *ngFor="let ns of namespaceList.namespaces"
+                    [value]="ns.objectMeta.name">
+          {{ns.objectMeta.name}}
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -42,7 +52,6 @@ limitations under the License.
 
   <div content
        *ngIf="isInitialized">
-    <span>Testing! If you see this, the reports section has been initialized.</span>
     <table mat-table
            [dataSource]="pdfList">
       <ng-container matColumnDef="name">

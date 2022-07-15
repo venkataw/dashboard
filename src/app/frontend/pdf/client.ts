@@ -38,7 +38,11 @@ export class ReportService {
     return this.http_.get('pdf/templates');
   }
 
-  genPdf(templateName: string, namespace: string) {
+  genPdf(templateName: string, namespace: string): Observable<Object> {
     return this.http_.get('pdf/gen/' + templateName + '/' + namespace);
+  }
+
+  getNamespaces(): Observable<Object> {
+    return this.http_.get('api/v1/namespace');
   }
 }

@@ -16,7 +16,8 @@ import {Component, ViewChild, OnDestroy, OnInit} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTable} from '@angular/material/table';
 import {ReportService} from './client';
-import {PdfRequestStatus, PdfTemplate, ReportContents, ReportItem} from './reporttypes';
+import {PdfRequestStatus, PdfTemplate, ReportContents, ReportItem} from './types';
+import {NamespaceList} from '@api/root.api';
 
 const UPDATE_INTERVAL = 5000; // how often to request a new report list from the api server (in ms)
 
@@ -28,10 +29,12 @@ const UPDATE_INTERVAL = 5000; // how often to request a new report list from the
 export class ReportComponent implements OnInit, OnDestroy {
   reportListInitialized = false;
   templateListInitialized = false;
+  namespaceListInitialized = false;
   isInitialized = false; // final initialization (ready to render)
   pdfList: ReportItem[] = [];
   templateList: PdfTemplate[] = [];
   updateInterval: NodeJS.Timer;
+  namespaceList: NamespaceList;
 
   // table with report list
   colList = ['name'];
@@ -39,6 +42,7 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   // dropdown for template selection
   selectedTemplate: string;
+  selectedNamespace: string;
 
   constructor(private readonly reportService_: ReportService, private readonly matSnackBar_: MatSnackBar) {}
 
@@ -48,11 +52,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     const listObserver = {
       next: (x: ReportItem[]) => (this.pdfList = x),
       error: (err: Error) => console.error('Error getting report list: ' + err),
-      complete: () => {
-        this.finishInit(true, false);
-        console.log('Report list initialized!');
-        console.log(this.pdfList);
-      },
+      complete: () => this.finishInit(true, false, false),
     };
     listObservable.subscribe(listObserver);
 
@@ -61,17 +61,22 @@ export class ReportComponent implements OnInit, OnDestroy {
     const templateObserver = {
       next: (x: PdfTemplate[]) => (this.templateList = x),
       error: (err: Error) => console.error('Error getting template list: ' + err),
-      complete: () => {
-        this.finishInit(false, true);
-        console.log('Template list initialized!');
-        console.log(this.templateList);
-      },
+      complete: () => this.finishInit(false, true, false),
     };
     templateObservable.subscribe(templateObserver);
 
+    // get namespace list
+    const namespaceObservable = this.reportService_.getNamespaces();
+    const namespaceObserver = {
+      next: (x: NamespaceList) => (this.namespaceList = x),
+      error: (err: Error) => console.error('Error getting namespace list: ' + err),
+      complete: () => this.finishInit(false, false, true),
+    };
+    namespaceObservable.subscribe(namespaceObserver);
+
     // Update the table once in a while
     this.updateInterval = setInterval(() => {
-      this.updateTable();
+      this.updateReportListTable();
     }, UPDATE_INTERVAL);
   }
   ngOnDestroy(): void {
@@ -79,14 +84,17 @@ export class ReportComponent implements OnInit, OnDestroy {
     console.log('I have been destroyed! kd-report-list');
   }
 
-  finishInit(reportListDone = false, templateListDone = false) {
+  finishInit(reportListDone = false, templateListDone = false, namespaceListDone = false) {
     if (reportListDone) {
       this.reportListInitialized = true;
     }
     if (templateListDone) {
       this.templateListInitialized = true;
     }
-    if (this.reportListInitialized && this.templateListInitialized) {
+    if (namespaceListDone) {
+      this.namespaceListInitialized = true;
+    }
+    if (this.reportListInitialized && this.templateListInitialized && this.namespaceListInitialized) {
       // done initializing.
       console.log('kd-report-list initialized!');
       this.isInitialized = true;
@@ -94,9 +102,7 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   downloadPdf(row: ReportItem): void {
-    console.log('Downloading pdf ' + row.name);
     let pdfContents: Uint16Array;
-
     const listObservable = this.reportService_.getPdf(row.name);
     const listObserver = {
       next: (x: ReportContents) => {
@@ -140,42 +146,43 @@ export class ReportComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  updateTable(): void {
+  // request new report list from server and update reports table
+  updateReportListTable(): void {
     const listObservable = this.reportService_.getList();
     const listObserver = {
       next: (x: ReportItem[]) => (this.pdfList = x),
       error: (err: Error) => console.error('Error getting report list: ' + err),
-      complete: () => {
-        console.log('Table updated.');
-        console.log(this.pdfList);
-        this.table.renderRows();
-      },
+      complete: () => this.table.renderRows(),
     };
     listObservable.subscribe(listObserver);
   }
 
   genPdf(): void {
     if (this.selectedTemplate) {
-      this.matSnackBar_.open('Generating report...');
-      console.log('Requesting generation of template ' + this.selectedTemplate);
-      // send request and get status back
-      const templateObservable = this.reportService_.genPdf(this.selectedTemplate, 'gabrian'); // TODO: add dropdown for namespace
-      const templateObserver = {
-        next: (x: PdfRequestStatus) => {
-          if (x.status === 'ok') {
-            this.updateTable();
-            this.matSnackBar_.open('Report generated!', 'Dismiss', {duration: 5000});
-          } else {
-            console.error('Error generating pdf: ' + x.error);
-            this.matSnackBar_.open('Error generating report: ' + x.error, 'Dismiss', {duration: 5000});
-          }
-        },
-        error: (err: Error) => {
-          console.error('Error sending request to generate pdf: ' + err);
-          this.matSnackBar_.open('Error generating report: ' + err, 'Dismiss', {duration: 5000});
-        },
-      };
-      templateObservable.subscribe(templateObserver);
+      if (this.selectedNamespace) {
+        this.matSnackBar_.open('Generating report...');
+        console.log('Requesting generation of template ' + this.selectedTemplate);
+        // send request and get status back
+        const templateObservable = this.reportService_.genPdf(this.selectedTemplate, this.selectedNamespace);
+        const templateObserver = {
+          next: (x: PdfRequestStatus) => {
+            if (x.status === 'ok') {
+              this.updateReportListTable();
+              this.matSnackBar_.open('Report generated!', 'Dismiss', {duration: 5000});
+            } else {
+              console.error('Error generating pdf: ' + x.error);
+              this.matSnackBar_.open('Error generating report: ' + x.error, 'Dismiss', {duration: 5000});
+            }
+          },
+          error: (err: Error) => {
+            console.error('Error sending request to generate pdf: ' + err);
+            this.matSnackBar_.open('Error generating report: ' + err, 'Dismiss', {duration: 5000});
+          },
+        };
+        templateObservable.subscribe(templateObserver);
+      } else {
+        this.matSnackBar_.open('Select a namespace first!', 'Dismiss', {duration: 5000});
+      }
     } else {
       this.matSnackBar_.open('Select a template first!', 'Dismiss', {duration: 5000});
     }
