@@ -19,7 +19,6 @@ import {LogService} from '@common/services/global/logs';
 import {jsPDF} from 'jspdf';
 import {Observable} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
-import {ExportPdfComponent} from './pdftracker';
 
 @Component({
   selector: 'kd-actionbar-detail-exportpdf',
@@ -59,6 +58,9 @@ export class ActionbarDetailExportpdfComponent {
   ]);
 
   static currentSnackbar: MatSnackBarRef<TextOnlySnackBar>;
+  static exportPdfComponent: ActionbarDetailExportpdfComponent;
+
+  k8sObjectsWithLogs: string[] = ['pod', 'replicaset', 'statefulset', 'daemonset', 'job'];
 
   logSources: LogSources;
   pod: string;
@@ -74,37 +76,23 @@ export class ActionbarDetailExportpdfComponent {
   private pageWidth: number;
 
   constructor(private readonly matSnackBar_: MatSnackBar, readonly logService: LogService) {
-    ExportPdfComponent.exportPdfComponent = this;
-
-    if (ExportPdfComponent.curResourceType === 'pod') {
-      this.namespace = ExportPdfComponent.curNamespace;
-      this.resourceType = ExportPdfComponent.curResourceType;
-      this.resourceName = ExportPdfComponent.curResourceName;
-      this.containers = ExportPdfComponent.curContainers;
-      this.containerName = this.containers[0].name; //TODO: FIX THIS (support for all containers in different pages)
-    } else {
-      this.namespace = undefined;
-      this.resourceType = undefined;
-      this.resourceName = undefined;
-      this.containerName = undefined;
-    }
-
     this.logService = logService;
+    ActionbarDetailExportpdfComponent.exportPdfComponent = this;
   }
 
   onClick(): void {
     const searchElement = ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind);
 
-    if (this.namespace && this.resourceType && this.resourceName && this.containerName) {
+    if (this.k8sObjectsWithLogs.includes(this.typeMeta.kind)) {
       this.logService
-        .getResource<LogSources>(`source/${this.namespace}/${this.resourceName}/${this.resourceType}`)
+        .getResource<LogSources>(`source/${this.objectMeta.namespace}/${this.objectMeta.name}/${this.typeMeta.kind}`)
         .pipe(
           switchMap<LogSources, Observable<LogDetails>>(data => {
             this.logSources = data;
-            this.pod = data.podNames[0]; // Pick first pod (cannot use resource name as it may not be a pod).
-            this.container = this.containerName ? this.containerName : data.containerNames[0]; // Pick from URL or first.
+            const pod = data.podNames[0]; // Pick first pod (cannot use resource name as it may not be a pod).
+            this.containerName = data.containerNames[0]; // Pick from URL or first.
 
-            return this.logService.getResource(`${this.namespace}/${this.pod}/${this.container}`);
+            return this.logService.getResource(`${this.objectMeta.namespace}/${pod}/${this.containerName}`);
           })
         )
         .pipe(take(1))
@@ -115,7 +103,9 @@ export class ActionbarDetailExportpdfComponent {
     }
 
     if (searchElement) {
-      ActionbarDetailExportpdfComponent.currentSnackbar = this.matSnackBar_.open('Generating pdf...', 'Dismiss');
+      ActionbarDetailExportpdfComponent.currentSnackbar = this.matSnackBar_.open('Generating pdf...', 'Dismiss', {
+        duration: 10000,
+      });
       this.generatePdf(ActionbarDetailExportpdfComponent.k8sObjectMap.get(this.typeMeta.kind));
     } else {
       console.error('K8s object type not supported yet, aborting');
@@ -132,22 +122,15 @@ export class ActionbarDetailExportpdfComponent {
       format: [1500, this.pageWidth],
       userUnit: 300,
     });
-    if (targetElement !== null && targetElement !== undefined) {
+    if (targetElement) {
       pdf.html(targetElement, {
         callback: function (pdf) {
-          ExportPdfComponent.exportPdfComponent.dismissCurrentSnackbar();
-          ExportPdfComponent.exportPdfComponent.pdfExportCallback(pdf);
+          ActionbarDetailExportpdfComponent.exportPdfComponent.pdfExportCallback(pdf);
+          ActionbarDetailExportpdfComponent.currentSnackbar.dismiss();
         },
       });
     } else {
       console.error('Error! targetElement was not found! componentName: ' + componentName);
-    }
-  }
-
-  dismissCurrentSnackbar(): void {
-    const curSnackbar: MatSnackBarRef<TextOnlySnackBar> = ActionbarDetailExportpdfComponent.currentSnackbar;
-    if (curSnackbar !== null || curSnackbar !== undefined) {
-      curSnackbar.dismiss();
     }
   }
 
@@ -156,7 +139,7 @@ export class ActionbarDetailExportpdfComponent {
       // add logs section
       pdf.addPage();
       pdf.setFontSize(56);
-      pdf.text('Logs for container "' + this.containerName + '" on "' + this.resourceName + '"', 20, 30);
+      pdf.text('Logs for container "' + this.containerName + '" on "' + this.objectMeta.name + '"', 20, 30);
       pdf.setFontSize(36);
       let i = 0;
       for (const log of this.logsSnapshot.logs) {

@@ -15,7 +15,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Container, PodDetail} from '@api/root.api';
-import {ExportPdfComponent} from '@common/components/actionbar/detailactions/pdf/pdftracker';
 import {ActionbarService, ResourceMeta} from '@common/services/global/actionbar';
 import {NotificationsService} from '@common/services/global/notifications';
 import {KdStateService} from '@common/services/global/state';
@@ -58,8 +57,6 @@ export class PodDetailComponent implements OnInit, OnDestroy {
       .get(this.endpoint_.detail(), resourceName, resourceNamespace)
       .pipe(takeUntil(this.unsubscribe_))
       .subscribe((d: PodDetail) => {
-        ExportPdfComponent.setCurResource(d.objectMeta.namespace, d.typeMeta.kind, d.objectMeta.name, d.containers);
-
         this.pod = d;
         this.notifications_.pushErrors(d.errors);
         this.actionbar_.onInit.emit(new ResourceMeta('Pod', d.objectMeta, d.typeMeta));
@@ -68,8 +65,6 @@ export class PodDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    ExportPdfComponent.clearCurResource();
-
     this.unsubscribe_.next();
     this.unsubscribe_.complete();
     this.actionbar_.onDetailsLeave.emit();
