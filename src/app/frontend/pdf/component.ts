@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {Component, ViewChild, OnDestroy, OnInit} from '@angular/core';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTable} from '@angular/material/table';
 import {ReportService} from './client';
 import {PdfRequestStatus, PdfTemplate, ReportContents, ReportItem} from './reporttypes';
@@ -39,7 +40,7 @@ export class ReportComponent implements OnInit, OnDestroy {
   // dropdown for template selection
   selectedTemplate: string;
 
-  constructor(private readonly reportService_: ReportService) {}
+  constructor(private readonly reportService_: ReportService, private readonly matSnackBar_: MatSnackBar) {}
 
   ngOnInit(): void {
     // get report list
@@ -155,24 +156,28 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   genPdf(): void {
     if (this.selectedTemplate) {
-      // TODO: add snackbar for feedback
+      this.matSnackBar_.open('Generating report...');
       console.log('Requesting generation of template ' + this.selectedTemplate);
       // send request and get status back
       const templateObservable = this.reportService_.genPdf(this.selectedTemplate, 'gabrian'); // TODO: add dropdown for namespace
       const templateObserver = {
         next: (x: PdfRequestStatus) => {
           if (x.status === 'ok') {
-            console.log('report generated!');
-            this.updateTable(); // TODO: snackbar feedback
+            this.updateTable();
+            this.matSnackBar_.open('Report generated!', 'Dismiss', {duration: 5000});
           } else {
-            console.error('Error generating pdf: ' + x.error); // TODO: add snackbar feedback
+            console.error('Error generating pdf: ' + x.error);
+            this.matSnackBar_.open('Error generating report: ' + x.error, 'Dismiss', {duration: 5000});
           }
         },
-        error: (err: Error) => console.error('Error sending request to generate pdf: ' + err),
+        error: (err: Error) => {
+          console.error('Error sending request to generate pdf: ' + err);
+          this.matSnackBar_.open('Error generating report: ' + err, 'Dismiss', {duration: 5000});
+        },
       };
       templateObservable.subscribe(templateObserver);
     } else {
-      console.log('Need to select a template first.'); // TODO: add snackbar feedback
+      this.matSnackBar_.open('Select a template first!', 'Dismiss', {duration: 5000});
     }
   }
 }
