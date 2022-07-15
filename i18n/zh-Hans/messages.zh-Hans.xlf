@@ -1273,7 +1273,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/workloads/deployment/detail/template.html</context>
@@ -4083,7 +4083,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">51</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4814940703935231049" datatype="html">
@@ -6495,12 +6495,28 @@
           <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="7596988543265053330" datatype="html">
+        <source>Generate Report</source>
+        <target state="new">Generate Report</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="5610425955750546094" datatype="html">
         <source>Template</source>
         <target state="new">Template</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7191922966431442466" datatype="html">
+        <source>Namepace</source>
+        <target state="new">Namepace</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5896009741331779309" datatype="html">
@@ -6508,7 +6524,7 @@
         <target state="new">Generate Selected Report</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
-          <context context-type="linenumber">35</context>
+          <context context-type="linenumber">45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2634769168106360285" datatype="html">
