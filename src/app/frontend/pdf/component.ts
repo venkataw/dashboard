@@ -121,10 +121,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         pdfContents = new Uint16Array(u8arr.buffer);
       },
       error: (err: Error) => console.error('Error getting pdf content: ' + err),
-      complete: () => {
-        console.log('saving pdf...');
-        this.savePdf(pdfContents, row.name);
-      },
+      complete: () => this.savePdf(pdfContents, row.name),
     };
     listObservable.subscribe(listObserver);
   }

@@ -14,7 +14,7 @@
 
 import {Component, Input} from '@angular/core';
 import {MatSnackBar, MatSnackBarRef, TextOnlySnackBar} from '@angular/material/snack-bar';
-import {LogDetails, LogSources, ObjectMeta, TypeMeta, Container} from '@api/root.api';
+import {LogDetails, LogSources, ObjectMeta, TypeMeta} from '@api/root.api';
 import {LogService} from '@common/services/global/logs';
 import {jsPDF} from 'jspdf';
 import {Observable} from 'rxjs';
@@ -62,15 +62,7 @@ export class ActionbarDetailExportpdfComponent {
 
   k8sObjectsWithLogs: string[] = ['pod', 'replicaset', 'statefulset', 'daemonset', 'job'];
 
-  logSources: LogSources;
-  pod: string;
-  container: string;
-
-  namespace: any;
-  resourceType: any;
-  resourceName: any;
   containerName: any;
-  containers: Container[];
   logsSnapshot: LogDetails;
 
   private pageWidth: number;
@@ -88,7 +80,6 @@ export class ActionbarDetailExportpdfComponent {
         .getResource<LogSources>(`source/${this.objectMeta.namespace}/${this.objectMeta.name}/${this.typeMeta.kind}`)
         .pipe(
           switchMap<LogSources, Observable<LogDetails>>(data => {
-            this.logSources = data;
             const pod = data.podNames[0]; // Pick first pod (cannot use resource name as it may not be a pod).
             this.containerName = data.containerNames[0]; // Pick from URL or first.
 
