@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/phpdave11/gofpdf"
@@ -30,36 +31,36 @@ type Point struct {
 }
 
 var pointMap = map[string]Point{
-	"title.generated":               {30, 60},
-	"title.namespace":               {30, 80},
-	"poddetail.name":                {60, 33},
-	"poddetail.labels":              {30, 50},
-	"poddetail.taints":              {30, 70},
-	"poddetail.containers":          {30, 90},
-	"poddetail.pvc":                 {30, 130},
-	"poddetail.nodes":               {30, 150},
-	"poddetail.events":              {30, 170},
-	"podlogs.name":                  {60, 33},
-	"podlogs.logs":                  {30, 50},
-	"pvc.name":                      {60, 33},
-	"pvc.state":                     {30, 50},
-	"pvc.storageclass":              {30, 70},
-	"pvc.volume":                    {30, 90},
-	"pvc.labels":                    {30, 110},
-	"pvc.capacity":                  {30, 130},
-	"pvc.events":                    {30, 150},
-	"node.name":                     {65, 33},
-	"node.labels":                   {30, 50},
-	"node.taints":                   {30, 70},
-	"node.osimage":                  {30, 90},
-	"node.ip":                       {30, 110},
-	"node.schedulable":              {70, 120},
-	"node.state.networkunavailable": {90, 137},
-	"node.state.memorypressure":     {90, 147},
-	"node.state.diskpressure":       {90, 157},
-	"node.state.pidpressure":        {90, 167},
-	"node.state.ready":              {90, 177},
-	"node.events":                   {30, 195},
+	"title.generated":               {30, 50},
+	"title.namespace":               {30, 73},
+	"poddetail.name":                {60, 30},
+	"poddetail.labels":              {30, 45},
+	"poddetail.taints":              {30, 65},
+	"poddetail.containers":          {30, 85},
+	"poddetail.pvc":                 {30, 120},
+	"poddetail.nodes":               {30, 140},
+	"poddetail.events":              {10, 160},
+	"podlogs.name":                  {60, 30},
+	"podlogs.logs":                  {10, 40},
+	"pvc.name":                      {60, 30},
+	"pvc.state":                     {30, 45},
+	"pvc.storageclass":              {30, 65},
+	"pvc.volume":                    {30, 85},
+	"pvc.labels":                    {30, 105},
+	"pvc.capacity":                  {30, 125},
+	"pvc.events":                    {10, 140},
+	"node.name":                     {65, 30},
+	"node.labels":                   {10, 44},
+	"node.taints":                   {30, 65},
+	"node.osimage":                  {30, 85},
+	"node.ip":                       {30, 105},
+	"node.schedulable":              {70, 115},
+	"node.state.networkunavailable": {85, 135},
+	"node.state.memorypressure":     {85, 145},
+	"node.state.diskpressure":       {85, 155},
+	"node.state.pidpressure":        {85, 165},
+	"node.state.ready":              {85, 175},
+	"node.events":                   {10, 190},
 }
 
 var importer *gofpdi.Importer
@@ -80,7 +81,7 @@ func GenerateHealthCheckReport(namespace string) error {
 
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
-	pdf.SetFont("Helvetica", "", 12)
+	pdf.SetFont("Helvetica", "", 10)
 
 	// import templates
 	importer = gofpdi.NewImporter()
@@ -185,7 +186,7 @@ func GenerateHealthCheckReport(namespace string) error {
 func GenerateTestReport() error {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
-	pdf.SetFont("Helvetica", "", 12)
+	pdf.SetFont("Helvetica", "", 10)
 
 	// import templates
 	importer = gofpdi.NewImporter()
@@ -261,11 +262,9 @@ func addPvcPage(pdf *gofpdf.Fpdf, pvcPageId int, pvcName, state, storageclass, v
 }
 func addText(pdf *gofpdf.Fpdf, key string, text string) {
 	location := pointMap[key]
-	pdf.Text(location.x, location.y, text)
+	pdf.SetXY(location.x, location.y)
+	pdf.MultiCell(reportWidth-location.x, 4, text, "", "LT", false) // change borderStr to "1" for full borders (debug)
 }
 func addMultilineText(pdf *gofpdf.Fpdf, key string, text []string) {
-	location := pointMap[key]
-	for i, item := range text {
-		pdf.Text(location.x, location.y+float64(5*i), item)
-	}
+	addText(pdf, key, strings.Join(text[:], "\n"))
 }
