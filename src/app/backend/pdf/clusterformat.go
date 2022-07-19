@@ -56,8 +56,11 @@ func formatInternalIpString(addresses []v1.NodeAddress) string {
 	return formatted
 }
 func formatEventListArray(events common.EventList) []string {
-	eventArr := make([]string, len(events.Events))
-	for i, event := range events.Events {
+	return formatEventArray(events.Events)
+}
+func formatEventArray(events []common.Event) []string {
+	eventArr := make([]string, len(events))
+	for i, event := range events {
 		eventArr[i] = event.Message + ", Reason: " + event.Reason // TODO: ADD MORE DETAILS TO EVENT LIST
 	}
 	if len(eventArr) == 0 {

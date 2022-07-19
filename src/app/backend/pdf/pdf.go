@@ -159,11 +159,11 @@ func GenerateHealthCheckReport(namespace string) error {
 					pidPressure = string(item.Status)
 				case "Ready":
 					ready = string(item.Status)
+				case "NetworkUnavailable":
+					ready = string(item.Status)
 				}
 			}
-			networkUnavailable = "tbi"
-			// TODO: Implement NetworkUnavailable
-			// problem: how to get?
+			// TODO: NetworkUnavailable implemented but untested
 			addNodePage(pdf, nodePageId, node.ObjectMeta.Name, labels, taints, nodeInfo.NodeInfo.OSImage, internalIps, !nodeInfo.Unschedulable, networkUnavailable, memoryPressure, diskPressure, pidPressure, ready, events)
 		}
 	}
@@ -174,9 +174,16 @@ func GenerateHealthCheckReport(namespace string) error {
 	} else {
 		for _, pvc := range pvcList.Items {
 			labels := formatLabelString(pvc.ObjectMeta.Labels)
-			// TODO: Implement PVC events
-			// Problem: not available to API
-			addPvcPage(pdf, pvcPageId, pvc.ObjectMeta.Name, pvc.Status, *pvc.StorageClass, pvc.Volume, labels, fmt.Sprint(pvc.Capacity.Storage()), []string{"tbi"})
+			// TODO: Test implementation of PVC events
+			events, err := getPvcEvents(namespace, pvc.ObjectMeta.Name)
+			eventList := []string{"No events"}
+			if err != nil {
+				eventList[0] = "Error getting events"
+			}
+			if len(eventList) > 0 {
+				eventList = formatEventArray(events)
+			}
+			addPvcPage(pdf, pvcPageId, pvc.ObjectMeta.Name, pvc.Status, *pvc.StorageClass, pvc.Volume, labels, fmt.Sprint(pvc.Capacity.Storage()), eventList)
 		}
 	}
 

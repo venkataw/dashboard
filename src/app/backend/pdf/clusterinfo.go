@@ -201,6 +201,46 @@ func namespaceExists(namespace string) (nsExists bool, err error) {
 	}
 	return false, errors.New("Could not find namespace " + namespace)
 }
+func getEvents(namespace string) (events common.EventList, err error) {
+	resp, err := getHttp("event/" + namespace)
+	if err != nil {
+		log.Printf("Error getting event list for namespace %s, error: %v", namespace, err)
+		return common.EventList{}, err
+	}
+	bodyBytes, err := parseHtmlToBytes(resp)
+	if err != nil {
+		log.Printf("Error parsing html of event list in namespace %s, error: %v", namespace, err)
+		return common.EventList{}, err
+	}
+
+	var eventList common.EventList = common.EventList{}
+	err = json.Unmarshal(bodyBytes, &eventList)
+	if err != nil {
+		log.Printf("Error parsing json of event list in namespace %s, error: %v", namespace, err)
+		return common.EventList{}, err
+	}
+
+	return eventList, nil
+}
+func getPvcEvents(namespace, pvcName string) (events []common.Event, err error) {
+	eventList, err := getEvents(namespace)
+	if err != nil {
+		log.Printf("Error getting events, cannot get pvc events. Error: %v", err)
+		return []common.Event{}, err
+	}
+	events = make([]common.Event, 0)
+	for _, event := range eventList.Events {
+		if event.SubObjectKind == "PersistentVolumeClaim" { // TODO: test this
+			if event.SubObjectName == pvcName {
+				events = append(events, event)
+			}
+		}
+	}
+	if len(events) == 0 {
+		return []common.Event{}, nil // no events
+	}
+	return events, nil
+}
 
 // Helper http/s functions
 func getProtocol() string {
