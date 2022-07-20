@@ -33,6 +33,7 @@ type pdfContent struct {
 type pdfRequestStatus struct {
 	Status       string `json:"status"`
 	ErrorMessage string `json:"error"`
+	FileName     string `json:"file"`
 }
 type pdfTemplate struct {
 	Name        string `json:"name"`
@@ -91,24 +92,24 @@ func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 	namespace := request.PathParameter("namespace")
 	log.Printf("Generating health check pdf for %v...", namespace)
 
-	err := GenerateHealthCheckReport(namespace)
+	fileName, err := GenerateHealthCheckReport(namespace)
 
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfRequestStatus{Status: "error", ErrorMessage: fmt.Sprint(err)})
 	} else {
-		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok"})
+		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok", FileName: fileName})
 	}
 }
 
 func genTestPdf(_ *restful.Request, response *restful.Response) {
 	log.Printf("Generating test pdf...")
 
-	err := GenerateTestReport()
+	fileName, err := GenerateTestReport()
 
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfRequestStatus{Status: "error", ErrorMessage: fmt.Sprint(err)})
 	} else {
-		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok"})
+		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok", FileName: fileName})
 	}
 }
 

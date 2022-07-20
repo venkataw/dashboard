@@ -71,14 +71,15 @@ const (
 	ReportDir    string  = "/tmp/pdf"
 )
 
-func GenerateHealthCheckReport(namespace string) error {
+func GenerateHealthCheckReport(namespace string) (fileName string, err error) {
 	// Check if namespace exists first
 	exists, _ := namespaceExists(namespace)
 	if !exists {
 		log.Printf("Namespace %s doesn't exist, cannot create health check report.", namespace)
-		return errors.New("Namespace " + namespace + " doesn't exist")
+		return "", errors.New("Namespace " + namespace + " doesn't exist")
 	}
 
+	// create the pdf document
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 10)
@@ -107,7 +108,7 @@ func GenerateHealthCheckReport(namespace string) error {
 
 			logArr := make([]string, len(logDetail.LogLines))
 			for i, value := range logDetail.LogLines {
-				logArr[i] = fmt.Sprintf("[%s] %s", string(value.Timestamp), value.Content)
+				logArr[i] = fmt.Sprintf("[%s] %s", value.Timestamp, value.Content)
 			}
 
 			events, err := getPodEvents(namespace, pod.ObjectMeta.Name)
@@ -127,15 +128,17 @@ func GenerateHealthCheckReport(namespace string) error {
 		}
 	}
 
+	// node detail
 	nodes, err := getNodeList()
 	if err != nil {
 		log.Printf("Error getting node list. Skipping. Error: %v", err)
 	} else {
 		for _, node := range nodes.Nodes {
-			// get more specific
+			// get more specific node information
 			nodeInfo, err := getNodeDetail(node.ObjectMeta.Name)
 			if err != nil {
 				log.Printf("Error getting more specific node detail for %s, skipping. Error: %v", node.ObjectMeta.Name, err)
+				continue
 			}
 			labels := formatLabelString(node.ObjectMeta.Labels)
 			taints := formatTaintString(nodeInfo.Taints)
@@ -168,6 +171,7 @@ func GenerateHealthCheckReport(namespace string) error {
 		}
 	}
 
+	// pvc detail
 	pvcList, err := getPvcDetail(namespace)
 	if err != nil {
 		log.Printf("Error getting pvc list. Skipping. Error: %v", err)
@@ -187,10 +191,12 @@ func GenerateHealthCheckReport(namespace string) error {
 		}
 	}
 
-	err = pdf.OutputFileAndClose(ReportDir + "/HealthCheck-" + namespace + "-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
-	return err
+	// save as HealthCheck-namespace-dateandtime.pdf
+	fileName = fmt.Sprintf("HealthCheck-%s-%s.pdf", namespace, time.Now().Format("01-02-2006_15-04-05"))
+	err = pdf.OutputFileAndClose(ReportDir + "/" + fileName)
+	return fileName, err
 }
-func GenerateTestReport() error {
+func GenerateTestReport() (fileName string, err error) {
 	pdf := gofpdf.New(gofpdf.OrientationPortrait, "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Helvetica", "", 10)
@@ -215,8 +221,9 @@ func GenerateTestReport() error {
 
 	addPvcPage(pdf, pvcPageId, "SAMPLE-PVC-1", "bound", "local-storage", "SAMPLE-PV-1", "LABEL1, LABEL2, LABEL3", "100Ti", []string{"EVENT1", "EVENT2", "EVENT3"})
 
-	err := pdf.OutputFileAndClose(ReportDir + "/Test-SAMPLE-NAMESPACE-" + time.Now().Format("01-02-2006_15-04-05") + ".pdf")
-	return err
+	fileName = fmt.Sprintf("Test-%s-%s.pdf", "SAMPLE-NAMESPACE", time.Now().Format("01-02-2006_15-04-05"))
+	err = pdf.OutputFileAndClose(ReportDir + "/" + fileName)
+	return fileName, err
 }
 func addTitlePage(pdf *gofpdf.Fpdf, titlePageId int, namespace string) {
 	importer.UseImportedTemplate(pdf, titlePageId, 0, 0, reportWidth, reportHeight)

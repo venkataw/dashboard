@@ -165,7 +165,7 @@ export class ReportComponent implements OnInit, OnDestroy {
           next: (x: PdfRequestStatus) => {
             if (x.status === 'ok') {
               this.updateReportListTable();
-              this.matSnackBar_.open('Report generated!', 'Dismiss', {duration: 5000});
+              this.matSnackBar_.open('Report generated! ' + x.file, 'Dismiss', {duration: 5000});
             } else {
               console.error('Error generating pdf: ' + x.error);
               this.matSnackBar_.open('Error generating report: ' + x.error, 'Dismiss', {duration: 5000});

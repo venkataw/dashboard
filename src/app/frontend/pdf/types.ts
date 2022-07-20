@@ -28,4 +28,5 @@ export interface PdfTemplate {
 export interface PdfRequestStatus {
   status: string;
   error: string;
+  file: string;
 }
