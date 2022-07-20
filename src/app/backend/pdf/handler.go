@@ -80,7 +80,7 @@ func getPdf(request *restful.Request, response *restful.Response) {
 	}
 }
 
-func getTemplates(request *restful.Request, response *restful.Response) {
+func getTemplates(_ *restful.Request, response *restful.Response) {
 	log.Print("Sending template list")
 	response.WriteHeaderAndEntity(http.StatusOK, templateList)
 }
@@ -100,7 +100,7 @@ func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 	}
 }
 
-func genTestPdf(request *restful.Request, response *restful.Response) {
+func genTestPdf(_ *restful.Request, response *restful.Response) {
 	log.Printf("Generating test pdf...")
 
 	err := GenerateTestReport()

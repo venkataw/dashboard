@@ -107,7 +107,7 @@ func GenerateHealthCheckReport(namespace string) error {
 
 			logArr := make([]string, len(logDetail.LogLines))
 			for i, value := range logDetail.LogLines {
-				logArr[i] = string(value.Timestamp) + "---" + value.Content
+				logArr[i] = fmt.Sprintf("[%s] %s", string(value.Timestamp), value.Content)
 			}
 
 			events, err := getPodEvents(namespace, pod.ObjectMeta.Name)
