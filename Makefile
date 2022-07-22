@@ -36,7 +36,8 @@ RELEASE_IMAGE_NAMES_LATEST += $(foreach arch, $(ARCHITECTURES), $(RELEASE_IMAGE)
 HEAD_IMAGE = kubernetesdashboarddev/dashboard
 HEAD_VERSION = latest
 HEAD_IMAGE_NAMES += $(foreach arch, $(ARCHITECTURES), $(HEAD_IMAGE)-$(arch):$(HEAD_VERSION))
-ARCHITECTURES = amd64 arm64 arm ppc64le s390x
+#ARCHITECTURES = amd64 arm64 arm ppc64le s390x
+ARCHITECTURES = amd64
 
 .PHONY: ensure-version
 ensure-version:
@@ -116,6 +117,7 @@ prod-backend: clean ensure-go
 prod-backend-cross: clean ensure-go
 	for ARCH in $(ARCHITECTURES) ; do \
   	CGO_ENABLED=0 GOOS=linux GOARCH=$$ARCH go build -a -installsuffix cgo -ldflags "-X $(MAIN_PACKAGE)/client.Version=$(RELEASE_VERSION)" -o dist/$$ARCH/dashboard $(MAIN_PACKAGE) ; \
+	cp -r templates dist/$$ARCH/templates ; \
   done
 
 .PHONY: prod
