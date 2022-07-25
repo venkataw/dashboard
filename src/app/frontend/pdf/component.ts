@@ -16,7 +16,7 @@ import {Component, ViewChild, OnDestroy, OnInit} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTable} from '@angular/material/table';
 import {ReportService} from './client';
-import {PdfRequestStatus, PdfTemplate, ReportContents, ReportItem} from './types';
+import {PdfRequestStatus, PdfTemplate, ReportContents, ReportItem, ReportsZip} from './types';
 import {NamespaceList} from '@api/root.api';
 
 const UPDATE_INTERVAL = 5000; // how often to request a new report list from the api server (in ms)
@@ -143,6 +143,23 @@ export class ReportComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  saveZip(contents: Uint8Array, fileName: string) {
+    const blob = new Blob([contents], {
+      type: 'octet/stream',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.style.display = 'none';
+    a.click();
+    a.remove();
+    setTimeout(() => {
+      return window.URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
   // request new report list from server and update reports table
   updateReportListTable(): void {
     const listObservable = this.reportService_.getList();
@@ -183,5 +200,29 @@ export class ReportComponent implements OnInit, OnDestroy {
     } else {
       this.matSnackBar_.open('Select a template first!', 'Dismiss', {duration: 5000});
     }
+  }
+
+  getZip(): void {
+    this.matSnackBar_.open('Generating zip archive of all reports...');
+    const zipObservable = this.reportService_.getReportsZip();
+    const zipObserver = {
+      next: (x: ReportsZip) => {
+        if (x.status === 'ok') {
+          this.matSnackBar_.open('Zip archive generated!', 'Dismiss', {duration: 5000});
+          this.saveZip(
+            Uint8Array.from(window.atob(x.contents), c => c.charCodeAt(0)),
+            'reports.zip'
+          ); // TODO: add name with date
+        } else {
+          console.error('Error getting zip archive: ' + x.error);
+          this.matSnackBar_.open('Error getting zip archive: ' + x.error, 'Dismiss', {duration: 5000});
+        }
+      },
+      error: (err: Error) => {
+        console.error('Error sending request to zip archives: ' + err);
+        this.matSnackBar_.open('Error sending request to zip archive: ' + err);
+      },
+    };
+    zipObservable.subscribe(zipObserver);
   }
 }

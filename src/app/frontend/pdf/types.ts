@@ -30,3 +30,9 @@ export interface PdfRequestStatus {
   error: string;
   file: string;
 }
+
+export interface ReportsZip {
+  status: string;
+  error: string;
+  contents: string; // base64 representation of file contents
+}

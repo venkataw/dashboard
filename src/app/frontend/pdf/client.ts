@@ -45,4 +45,8 @@ export class ReportService {
   getNamespaces(): Observable<Object> {
     return this.http_.get('api/v1/namespace');
   }
+
+  getReportsZip(): Observable<Object> {
+    return this.http_.get('pdf/zip');
+  }
 }

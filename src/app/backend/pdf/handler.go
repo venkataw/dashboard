@@ -15,8 +15,10 @@
 package pdf
 
 import (
+	"archive/zip"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -39,6 +41,11 @@ type pdfTemplate struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"displayname"`
 }
+type pdfZip struct {
+	Status   string `json:"status"`
+	Error    string `json:"error"`
+	Contents []byte `json:"contents"`
+}
 
 var (
 	ApiPort = 9090
@@ -50,26 +57,30 @@ var templateList []pdfTemplate = []pdfTemplate{
 	{"test", "Test Report"},
 }
 
-func getPdfList(request *restful.Request, response *restful.Response) {
-	log.Printf("Got request for pdf list. Request: %v", request)
-
+func getReportDirListing() []pdfDetail {
 	files, err := os.ReadDir(ReportDir)
 	if err != nil {
-		panic(err)
+		log.Printf("Failed to list report dir '%s', error: %v", ReportDir, err)
+		return nil
 	}
 	pdfList := make([]pdfDetail, len(files))
 	for i, file := range files {
 		pdfList[i].Name = file.Name()
 	}
-	log.Printf("pdfList built. Contents sending: %v", pdfList)
+	return pdfList
+}
+
+func getPdfList(request *restful.Request, response *restful.Response) {
+	log.Printf("Sending list of reports in ReportDir '%s'", ReportDir)
+
+	pdfList := getReportDirListing()
 
 	response.WriteHeaderAndEntity(http.StatusOK, pdfList)
 }
 
 func getPdf(request *restful.Request, response *restful.Response) {
-	log.Printf("Got request for a pdf. Request: %v", request)
 	pdfname := request.PathParameter("pdfname")
-	log.Printf("Want pdf: %v", pdfname)
+	log.Printf("Sending pdf '%s'", pdfname)
 
 	content, err := os.ReadFile(ReportDir + "/" + pdfname)
 	if errors.Is(err, os.ErrNotExist) {
@@ -90,7 +101,7 @@ func getTemplates(_ *restful.Request, response *restful.Response) {
 // TODO: 500 error might be problematic for frontend; check back later
 func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 	namespace := request.PathParameter("namespace")
-	log.Printf("Generating health check pdf for %v...", namespace)
+	log.Printf("Generating health check pdf for %v", namespace)
 
 	fileName, err := GenerateHealthCheckReport(namespace)
 
@@ -102,7 +113,7 @@ func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 }
 
 func genTestPdf(_ *restful.Request, response *restful.Response) {
-	log.Printf("Generating test pdf...")
+	log.Printf("Generating test pdf")
 
 	fileName, err := GenerateTestReport()
 
@@ -110,6 +121,61 @@ func genTestPdf(_ *restful.Request, response *restful.Response) {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfRequestStatus{Status: "error", ErrorMessage: fmt.Sprint(err)})
 	} else {
 		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok", FileName: fileName})
+	}
+}
+
+func zipAllReports(_ *restful.Request, response *restful.Response) {
+	log.Printf("Zipping all reports")
+	reports := getReportDirListing()
+	archive, err := os.Create(ReportDir + "/archive.zip")
+	if err != nil {
+		log.Printf("Unable to create zip archive, error: %v", err)
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfZip{Status: "error", Error: fmt.Sprint(err)})
+		return
+	}
+	writer := zip.NewWriter(archive)
+	fmt.Println("archive and writer created")
+	for _, report := range reports {
+		fmt.Println("writing file " + report.Name)
+		// open file
+		file, err := os.Open(ReportDir + "/" + report.Name)
+		if err != nil {
+			log.Printf("Failed to open file %s, skipping. Error: %v", report.Name, err)
+			continue
+		}
+		fmt.Println("file " + report.Name + " opened")
+		// write file to archive
+		write, err := writer.Create(report.Name)
+		if err != nil {
+			log.Printf("Failed to create file %s in zip archive, error: %v", report.Name, err)
+			continue
+		}
+		fmt.Println("file " + report.Name + " created in zip")
+		if _, err := io.Copy(write, file); err != nil {
+			log.Printf("Error copying file %s to zip archive: %v", report.Name, err)
+		}
+		fmt.Println("file " + report.Name + " copied successfully")
+		file.Close()
+	}
+	writer.Close()
+	archive.Close()
+
+	// read zip contents and send
+	fmt.Println("reading zip contents")
+	content, err := os.ReadFile(ReportDir + "/archive.zip")
+	if err != nil {
+		log.Printf("Error reading zip contents archive.zip: %v", err)
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfZip{Status: "error", Error: fmt.Sprint(err)})
+		return
+	}
+	fmt.Println("zip contents read, sending response")
+	response.WriteHeaderAndEntity(http.StatusOK, pdfZip{Status: "ok", Contents: content})
+
+	// delete archive.zip
+	fmt.Println("deleting archive.zip")
+	err = os.Remove(ReportDir + "/archive.zip")
+	if err != nil {
+		log.Printf("Error deleting archive.zip: %v", err)
 	}
 }
 
@@ -132,7 +198,7 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 	pdfApiWs.Route(
 		pdfApiWs.GET("/").
 			To(getPdfList).
-			Writes(pdfDetail{}))
+			Writes([]pdfDetail{}))
 	pdfApiWs.Route(
 		pdfApiWs.GET("/pdf/{pdfname}").
 			To(getPdf).
@@ -157,6 +223,10 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 		pdfApiWs.GET("/gen/healthcheck/{namespace}").
 			To(genHealthCheckPdf).
 			Writes(pdfRequestStatus{}))
+	pdfApiWs.Route(
+		pdfApiWs.GET("/zip").
+			To(zipAllReports).
+			Writes(pdfZip{}))
 
 	log.Print("PDF API handler initialized.")
 
