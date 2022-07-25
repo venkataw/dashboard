@@ -211,8 +211,8 @@ export class ReportComponent implements OnInit, OnDestroy {
           this.matSnackBar_.open('Zip archive generated!', 'Dismiss', {duration: 5000});
           this.saveZip(
             Uint8Array.from(window.atob(x.contents), c => c.charCodeAt(0)),
-            'reports.zip'
-          ); // TODO: add name with date
+            'reports-' + new Date().toISOString().replace(/T/, '_').replace(/:/g, '-') + '.zip'
+          );
         } else {
           console.error('Error getting zip archive: ' + x.error);
           this.matSnackBar_.open('Error getting zip archive: ' + x.error, 'Dismiss', {duration: 5000});

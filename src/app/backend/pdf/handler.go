@@ -134,45 +134,37 @@ func zipAllReports(_ *restful.Request, response *restful.Response) {
 		return
 	}
 	writer := zip.NewWriter(archive)
-	fmt.Println("archive and writer created")
 	for _, report := range reports {
-		fmt.Println("writing file " + report.Name)
 		// open file
 		file, err := os.Open(ReportDir + "/" + report.Name)
 		if err != nil {
 			log.Printf("Failed to open file %s, skipping. Error: %v", report.Name, err)
 			continue
 		}
-		fmt.Println("file " + report.Name + " opened")
 		// write file to archive
 		write, err := writer.Create(report.Name)
 		if err != nil {
 			log.Printf("Failed to create file %s in zip archive, error: %v", report.Name, err)
 			continue
 		}
-		fmt.Println("file " + report.Name + " created in zip")
 		if _, err := io.Copy(write, file); err != nil {
 			log.Printf("Error copying file %s to zip archive: %v", report.Name, err)
 		}
-		fmt.Println("file " + report.Name + " copied successfully")
 		file.Close()
 	}
 	writer.Close()
 	archive.Close()
 
 	// read zip contents and send
-	fmt.Println("reading zip contents")
 	content, err := os.ReadFile(ReportDir + "/archive.zip")
 	if err != nil {
 		log.Printf("Error reading zip contents archive.zip: %v", err)
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfZip{Status: "error", Error: fmt.Sprint(err)})
 		return
 	}
-	fmt.Println("zip contents read, sending response")
 	response.WriteHeaderAndEntity(http.StatusOK, pdfZip{Status: "ok", Contents: content})
 
 	// delete archive.zip
-	fmt.Println("deleting archive.zip")
 	err = os.Remove(ReportDir + "/archive.zip")
 	if err != nil {
 		log.Printf("Error deleting archive.zip: %v", err)
