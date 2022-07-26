@@ -57,6 +57,7 @@ var templateList []pdfTemplate = []pdfTemplate{
 	{"test", "Test Report"},
 }
 
+// helper functions
 func getReportDirListing() []pdfDetail {
 	files, err := os.ReadDir(ReportDir)
 	if err != nil {
@@ -70,6 +71,7 @@ func getReportDirListing() []pdfDetail {
 	return pdfList
 }
 
+// handler functions
 func getPdfList(request *restful.Request, response *restful.Response) {
 	log.Printf("Sending list of reports in ReportDir '%s'", ReportDir)
 
@@ -171,6 +173,18 @@ func zipAllReports(_ *restful.Request, response *restful.Response) {
 	}
 }
 
+func deleteReport(request *restful.Request, response *restful.Response) {
+	file := request.PathParameter("file")
+	log.Printf("Deleting file %s from report dir", file)
+
+	err := os.Remove(ReportDir + "/" + file)
+	if err != nil {
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, pdfRequestStatus{Status: "error", ErrorMessage: fmt.Sprint(err)})
+	} else {
+		response.WriteHeaderAndEntity(http.StatusOK, pdfRequestStatus{Status: "ok"})
+	}
+}
+
 func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 	ApiPort = port
 	Secure = isSecure
@@ -219,6 +233,10 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 		pdfApiWs.GET("/zip").
 			To(zipAllReports).
 			Writes(pdfZip{}))
+	pdfApiWs.Route(
+		pdfApiWs.GET("/delete/{file}").
+			To(deleteReport).
+			Writes(pdfRequestStatus{}))
 
 	log.Print("PDF API handler initialized.")
 
