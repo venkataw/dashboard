@@ -126,6 +126,10 @@
           <context context-type="linenumber">48</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/config/secret/detail/edit/template.html</context>
           <context context-type="linenumber">35</context>
         </context-group>
@@ -1090,7 +1094,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/workloads/deployment/detail/template.html</context>
@@ -2470,6 +2474,10 @@
           <context context-type="sourcefile">src/app/frontend/common/components/namespace/changedialog/template.html</context>
           <context context-type="linenumber">32</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="3542042671420335679" datatype="html">
         <source>No</source>
@@ -3029,6 +3037,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/common/components/list/column/menu/template.html</context>
           <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3802938417948102465" datatype="html">
@@ -6609,6 +6621,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
           <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3471192731553526505" datatype="html">
+        <source>Are you sure you want to delete "<x id="INTERPOLATION" equiv-text="&quot;\uFFFD0\uFFFD&quot;"/>"?</source>
+        <target state="new">Are you sure you want to delete "<x id="INTERPOLATION" equiv-text="&quot;\uFFFD0\uFFFD&quot;"/>"?</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2634769168106360285" datatype="html">
