@@ -15,16 +15,21 @@
 import {Component, ViewChild, OnDestroy, OnInit} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTable} from '@angular/material/table';
+import {MatDialog} from '@angular/material/dialog';
 import {ReportService} from './client';
 import {PdfRequestStatus, PdfTemplate, ReportContents, ReportItem, ReportsZip} from './types';
 import {NamespaceList} from '@api/root.api';
+import {DeleteReportDialog} from './delete-dialog';
 
 const UPDATE_INTERVAL = 5000; // how often to request a new report list from the api server (in ms)
+
+export interface DeleteDialogData {
+  reportName: string;
+}
 
 @Component({
   selector: 'kd-report-list',
   templateUrl: './template.html',
-  //styleUrls: ['style.scss'],
 })
 export class ReportComponent implements OnInit, OnDestroy {
   reportListInitialized = false;
@@ -37,14 +42,18 @@ export class ReportComponent implements OnInit, OnDestroy {
   namespaceList: NamespaceList;
 
   // table with report list
-  colList = ['name'];
+  colList = ['actions', 'name'];
   @ViewChild(MatTable) table: MatTable<ReportItem[]>;
 
   // dropdown for template selection
   selectedTemplate: string;
   selectedNamespace: string;
 
-  constructor(private readonly reportService_: ReportService, private readonly matSnackBar_: MatSnackBar) {}
+  constructor(
+    private readonly reportService_: ReportService,
+    private readonly matSnackBar_: MatSnackBar,
+    private readonly dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     // get report list
@@ -81,9 +90,9 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
   ngOnDestroy(): void {
     clearInterval(this.updateInterval);
-    console.log('I have been destroyed! kd-report-list');
   }
 
+  // make sure all three are done initializing before rendering template
   finishInit(reportListDone = false, templateListDone = false, namespaceListDone = false) {
     if (reportListDone) {
       this.reportListInitialized = true;
@@ -95,8 +104,7 @@ export class ReportComponent implements OnInit, OnDestroy {
       this.namespaceListInitialized = true;
     }
     if (this.reportListInitialized && this.templateListInitialized && this.namespaceListInitialized) {
-      // done initializing.
-      console.log('kd-report-list initialized!');
+      // done initializing, can render template now
       this.isInitialized = true;
     }
   }
@@ -126,6 +134,38 @@ export class ReportComponent implements OnInit, OnDestroy {
     listObservable.subscribe(listObserver);
   }
 
+  showDeletePdfDialog(row: ReportItem): void {
+    const dialogRef = this.dialog.open(DeleteReportDialog, {
+      //width: '250px',
+      data: {reportName: row.name},
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // result will be true if the user clicked "Yes"
+      if (result) {
+        this.deletePdf(row.name);
+      }
+    });
+  }
+
+  deletePdf(file: string) {
+    const deleteObservable = this.reportService_.requestDeleteReport(file);
+    const deleteObserver = {
+      next: (x: PdfRequestStatus) => {
+        if (x.status === 'ok') {
+          this.matSnackBar_.open('Successfully deleted ' + file, 'Dismiss', {duration: 5000});
+          this.updateReportListTable();
+        } else {
+          console.error('Error deleting ' + file + ': ' + x.error);
+          this.matSnackBar_.open('Error deleting ' + file + ': ' + x.error, 'Dismiss', {duration: 5000});
+        }
+      },
+      error: (err: Error) => console.error('Error deleting file: ' + err),
+    };
+    deleteObservable.subscribe(deleteObserver);
+  }
+
+  // save pdf contents to disk
   savePdf(contents: Uint16Array, fileName: string) {
     const blob = new Blob([contents], {
       type: 'application/pdf',
@@ -143,6 +183,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  // save zip contents to disk
   saveZip(contents: Uint8Array, fileName: string) {
     const blob = new Blob([contents], {
       type: 'octet/stream',
@@ -172,10 +213,10 @@ export class ReportComponent implements OnInit, OnDestroy {
   }
 
   genPdf(): void {
+    // require the user to select a template and a namespace
     if (this.selectedTemplate) {
       if (this.selectedNamespace) {
         this.matSnackBar_.open('Generating report...');
-        console.log('Requesting generation of template ' + this.selectedTemplate);
         // send request and get status back
         const templateObservable = this.reportService_.genPdf(this.selectedTemplate, this.selectedNamespace);
         const templateObserver = {

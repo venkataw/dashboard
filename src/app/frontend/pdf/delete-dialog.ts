@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {NgModule} from '@angular/core';
+import {Component, Inject} from '@angular/core';
+import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {DeleteDialogData} from './component';
 
-import {ComponentsModule} from '@common/components/module';
-import {SharedModule} from '../shared.module';
-import {ReportComponent} from './component';
-import {DeleteReportDialog} from './delete-dialog';
-import {ReportsRoutingComponent} from './routing';
-
-@NgModule({
-  imports: [SharedModule, ComponentsModule, ReportsRoutingComponent],
-  declarations: [ReportComponent, DeleteReportDialog],
+@Component({
+  selector: 'delete-report-dialog',
+  templateUrl: './delete-dialog.html',
 })
-export class PdfModule {}
+export class DeleteReportDialog {
+  constructor(
+    public dialogRef: MatDialogRef<DeleteReportDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: DeleteDialogData
+  ) {}
+}

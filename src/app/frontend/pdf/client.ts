@@ -49,4 +49,8 @@ export class ReportService {
   getReportsZip(): Observable<Object> {
     return this.http_.get('pdf/zip');
   }
+
+  requestDeleteReport(name: string) {
+    return this.http_.get('pdf/delete/' + name);
+  }
 }
