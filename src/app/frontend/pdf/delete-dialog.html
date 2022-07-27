@@ -15,10 +15,17 @@ limitations under the License.
 -->
 
 <h1 mat-dialog-title>Delete Report</h1>
-<div mat-dialog-content class="mat-typography">
-    <p i18n>Are you sure you want to delete "{{data.reportName}}"?</p>
+<div mat-dialog-content
+     class="mat-typography">
+  <p i18n>Are you sure you want to delete "{{data.reportName}}"?</p>
 </div>
-<div mat-dialog-actions align="end">
-    <button mat-button i18n [mat-dialog-close]="false">Cancel</button>
-    <button mat-button i18n [mat-dialog-close]="true" cdkFocusInitial>Yes</button>
+<div mat-dialog-actions
+     align="end">
+  <button mat-button
+          i18n
+          [mat-dialog-close]="false">Cancel</button>
+  <button mat-button
+          i18n
+          [mat-dialog-close]="true"
+          cdkFocusInitial>Yes</button>
 </div>

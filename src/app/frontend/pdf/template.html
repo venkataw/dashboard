@@ -64,10 +64,14 @@ limitations under the License.
             i18n>Actions</th>
         <td mat-cell
             *matCellDef="let element">
-          <button mat-icon-button aria-label="Download" (click)="downloadPdf(element)">
+          <button mat-icon-button
+                  aria-label="Download"
+                  (click)="downloadPdf(element)">
             <mat-icon>file_download</mat-icon>
           </button>
-          <button mat-icon-button aria-label="Delete" (click)="showDeletePdfDialog(element)">
+          <button mat-icon-button
+                  aria-label="Delete"
+                  (click)="showDeletePdfDialog(element)">
             <mat-icon>delete</mat-icon>
           </button>
         </td>
