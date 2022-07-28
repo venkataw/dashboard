@@ -78,22 +78,7 @@ func getReportDirListing() []pdfDetail {
 	return pdfList
 }
 func jweFormatCookieString(cookie string) string {
-	/*const (
-		protectedHeader    string = "%7B%22protected%22%3A%22"
-		aadHeader          string = "%22%2C%22aad%22%3A%22"
-		encryptedKeyHeader string = "%22%2C%22encrypted_key%22%3A%22"
-		tagHeader          string = "%22%2C%22tag%22%3A%22"
-		endHeader          string = "%22%7D"
-	)
-	// extract jwt fields from cookie
-	protected := cookie[strings.Index(cookie, protectedHeader)+len(protectedHeader) : strings.Index(cookie, aadHeader)]
-	aad := cookie[strings.Index(cookie, aadHeader)+len(aadHeader) : strings.Index(cookie, encryptedKeyHeader)]
-	encryptedKey := cookie[strings.Index(cookie, encryptedKeyHeader)+len(encryptedKeyHeader) : strings.Index(cookie, tagHeader)]
-	tag := cookie[strings.Index(cookie, tagHeader)+len(tagHeader) : strings.Index(cookie, endHeader)]
-
-	// format into string delimited by periods (.)
-	return fmt.Sprintf("%s.%s.%s.%s", protected, aad, encryptedKey, tag)*/
-
+	// jwe decrypt expects json format, so convert cookie format into json
 	cookie = strings.ReplaceAll(cookie, "%7B", "{")
 	cookie = strings.ReplaceAll(cookie, "%22", "\"")
 	cookie = strings.ReplaceAll(cookie, "%3A", ":")
@@ -140,18 +125,16 @@ func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 	cookie, err := request.Request.Cookie("jweToken")
 	if err != nil {
 		log.Printf("Error getting cookie 'jweToken' from request: %v", err)
+		log.Printf("Trying to generate health check report without bearer token")
+		setBearerToken("")
+	} else {
+		encrypted := jweFormatCookieString(cookie.Value)
+		authInfo, err := tokenManager.Decrypt(encrypted)
+		if err != nil {
+			log.Printf("Error decrypting bearer token: %v", err)
+		}
+		setBearerToken(authInfo.Token)
 	}
-	log.Printf("!!!!!!!!!!!!!!!!! cookie value is %s", cookie.Value)
-
-	encrypted := jweFormatCookieString(cookie.Value)
-	log.Printf("!!!!!!!!!!!!!!! encrypted jwt is %s", encrypted)
-
-	authInfo, err := tokenManager.Decrypt(encrypted)
-	if err != nil {
-		log.Printf("Error decrypting bearer token: %v", err)
-	}
-	log.Printf("Got authinfo: %v", authInfo)
-	setBearerToken(authInfo.Token)
 
 	fileName, err := GenerateHealthCheckReport(namespace)
 

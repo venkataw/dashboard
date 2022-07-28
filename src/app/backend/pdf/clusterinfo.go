@@ -266,7 +266,10 @@ func getHttp(path string) (resp *http.Response, err error) {
 		log.Printf("Error creating request for %s, error: %v", path, err)
 		return nil, err
 	}
-	request.Header.Set("Authorization", "Bearer "+bearerToken)
+	if bearerToken != "" {
+		// add bearer token if exists
+		request.Header.Set("Authorization", "Bearer "+bearerToken)
+	}
 	response, err := client.Do(request)
 	if err != nil {
 		log.Printf("Error doing request for %s, error: %v", path, err)
