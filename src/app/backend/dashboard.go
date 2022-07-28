@@ -224,6 +224,9 @@ func initAuthManager(clientManager clientapi.ClientManager) authApi.AuthManager 
 		tokenManager.SetTokenTTL(tokenTTL)
 	}
 
+	// Let pdf api decrypt to get bearer token by giving tokenManager
+	pdf.SetTokenManager(tokenManager)
+
 	// Set token manager for client manager.
 	clientManager.SetTokenManager(tokenManager)
 	authModes := authApi.ToAuthenticationModes(args.Holder.GetAuthenticationMode())

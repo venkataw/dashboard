@@ -60,7 +60,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     const listObservable = this.reportService_.getList();
     const listObserver = {
       next: (x: ReportItem[]) => (this.pdfList = x),
-      error: (err: Error) => console.error('Error getting report list: ' + err),
+      error: (err: Error) => console.error('Error getting report list: ' + err.message),
       complete: () => this.finishInit(true, false, false),
     };
     listObservable.subscribe(listObserver);
@@ -69,7 +69,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     const templateObservable = this.reportService_.getTemplates();
     const templateObserver = {
       next: (x: PdfTemplate[]) => (this.templateList = x),
-      error: (err: Error) => console.error('Error getting template list: ' + err),
+      error: (err: Error) => console.error('Error getting template list: ' + err.message),
       complete: () => this.finishInit(false, true, false),
     };
     templateObservable.subscribe(templateObserver);
@@ -78,7 +78,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     const namespaceObservable = this.reportService_.getNamespaces();
     const namespaceObserver = {
       next: (x: NamespaceList) => (this.namespaceList = x),
-      error: (err: Error) => console.error('Error getting namespace list: ' + err),
+      error: (err: Error) => console.error('Error getting namespace list: ' + err.message),
       complete: () => this.finishInit(false, false, true),
     };
     namespaceObservable.subscribe(namespaceObserver);
@@ -128,7 +128,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         }
         pdfContents = new Uint16Array(u8arr.buffer);
       },
-      error: (err: Error) => console.error('Error getting pdf content: ' + err),
+      error: (err: Error) => console.error('Error getting pdf content: ' + err.message),
       complete: () => this.savePdf(pdfContents, row.name),
     };
     listObservable.subscribe(listObserver);
@@ -160,7 +160,7 @@ export class ReportComponent implements OnInit, OnDestroy {
           this.matSnackBar_.open('Error deleting ' + file + ': ' + x.error, 'Dismiss', {duration: 5000});
         }
       },
-      error: (err: Error) => console.error('Error deleting file: ' + err),
+      error: (err: Error) => console.error('Error deleting file: ' + err.message),
     };
     deleteObservable.subscribe(deleteObserver);
   }
@@ -206,7 +206,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     const listObservable = this.reportService_.getList();
     const listObserver = {
       next: (x: ReportItem[]) => (this.pdfList = x),
-      error: (err: Error) => console.error('Error getting report list: ' + err),
+      error: (err: Error) => console.error('Error getting report list: ' + err.message),
       complete: () => this.table.renderRows(),
     };
     listObservable.subscribe(listObserver);
@@ -230,8 +230,8 @@ export class ReportComponent implements OnInit, OnDestroy {
             }
           },
           error: (err: Error) => {
-            console.error('Error sending request to generate pdf: ' + err);
-            this.matSnackBar_.open('Error generating report: ' + err, 'Dismiss', {duration: 5000});
+            console.error('Error sending request to generate pdf: ' + err.message);
+            this.matSnackBar_.open('Error generating report: ' + err.message, 'Dismiss', {duration: 5000});
           },
         };
         templateObservable.subscribe(templateObserver);
@@ -260,8 +260,8 @@ export class ReportComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: Error) => {
-        console.error('Error sending request to zip archives: ' + err);
-        this.matSnackBar_.open('Error sending request to zip archive: ' + err);
+        console.error('Error sending request to zip archives: ' + err.message);
+        this.matSnackBar_.open('Error sending request to zip archive: ' + err.message);
       },
     };
     zipObservable.subscribe(zipObserver);

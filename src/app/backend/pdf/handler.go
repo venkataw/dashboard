@@ -16,16 +16,21 @@ package pdf
 
 import (
 	"archive/zip"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/emicklei/go-restful/v3"
+
+	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
 )
 
+// types to send to frontend
 type pdfDetail struct {
 	Name string `json:"name"`
 }
@@ -48,10 +53,12 @@ type pdfZip struct {
 }
 
 var (
-	ApiPort = 9090
-	Secure  = false
+	ApiPort      = 9090
+	Secure       = false
+	tokenManager authApi.TokenManager
 )
 
+// list of templates that the frontend can request for generation
 var templateList []pdfTemplate = []pdfTemplate{
 	{"healthcheck", "Health Check Report"},
 	{"test", "Test Report"},
@@ -69,6 +76,30 @@ func getReportDirListing() []pdfDetail {
 		pdfList[i].Name = file.Name()
 	}
 	return pdfList
+}
+func jweFormatCookieString(cookie string) string {
+	/*const (
+		protectedHeader    string = "%7B%22protected%22%3A%22"
+		aadHeader          string = "%22%2C%22aad%22%3A%22"
+		encryptedKeyHeader string = "%22%2C%22encrypted_key%22%3A%22"
+		tagHeader          string = "%22%2C%22tag%22%3A%22"
+		endHeader          string = "%22%7D"
+	)
+	// extract jwt fields from cookie
+	protected := cookie[strings.Index(cookie, protectedHeader)+len(protectedHeader) : strings.Index(cookie, aadHeader)]
+	aad := cookie[strings.Index(cookie, aadHeader)+len(aadHeader) : strings.Index(cookie, encryptedKeyHeader)]
+	encryptedKey := cookie[strings.Index(cookie, encryptedKeyHeader)+len(encryptedKeyHeader) : strings.Index(cookie, tagHeader)]
+	tag := cookie[strings.Index(cookie, tagHeader)+len(tagHeader) : strings.Index(cookie, endHeader)]
+
+	// format into string delimited by periods (.)
+	return fmt.Sprintf("%s.%s.%s.%s", protected, aad, encryptedKey, tag)*/
+
+	cookie = strings.ReplaceAll(cookie, "%7B", "{")
+	cookie = strings.ReplaceAll(cookie, "%22", "\"")
+	cookie = strings.ReplaceAll(cookie, "%3A", ":")
+	cookie = strings.ReplaceAll(cookie, "%2C", ",")
+	cookie = strings.ReplaceAll(cookie, "%7D", "}")
+	return cookie
 }
 
 // handler functions
@@ -104,6 +135,23 @@ func getTemplates(_ *restful.Request, response *restful.Response) {
 func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 	namespace := request.PathParameter("namespace")
 	log.Printf("Generating health check pdf for %v", namespace)
+
+	// decrypt bearer token from cookie
+	cookie, err := request.Request.Cookie("jweToken")
+	if err != nil {
+		log.Printf("Error getting cookie 'jweToken' from request: %v", err)
+	}
+	log.Printf("!!!!!!!!!!!!!!!!! cookie value is %s", cookie.Value)
+
+	encrypted := jweFormatCookieString(cookie.Value)
+	log.Printf("!!!!!!!!!!!!!!! encrypted jwt is %s", encrypted)
+
+	authInfo, err := tokenManager.Decrypt(encrypted)
+	if err != nil {
+		log.Printf("Error decrypting bearer token: %v", err)
+	}
+	log.Printf("Got authinfo: %v", authInfo)
+	setBearerToken(authInfo.Token)
 
 	fileName, err := GenerateHealthCheckReport(namespace)
 
@@ -185,6 +233,10 @@ func deleteReport(request *restful.Request, response *restful.Response) {
 	}
 }
 
+func SetTokenManager(tokenMgr authApi.TokenManager) {
+	tokenManager = tokenMgr
+}
+
 func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 	ApiPort = port
 	Secure = isSecure
@@ -237,6 +289,12 @@ func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 		pdfApiWs.GET("/delete/{file}").
 			To(deleteReport).
 			Writes(pdfRequestStatus{}))
+
+	// TODO: Remove this. Ignores self-signed certs for testing purposes only
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	// initialize http client in clusterinfo.go.
+	initializeHttpClient()
 
 	log.Print("PDF API handler initialized.")
 

@@ -30,6 +30,16 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/pod"
 )
 
+var client http.Client
+var bearerToken string
+
+func initializeHttpClient() {
+	client = http.Client{}
+}
+func setBearerToken(token string) {
+	bearerToken = token
+}
+
 func getPodDetail(namespace string) (response pod.PodList, err error) {
 	resp, err := getHttp("pod/" + namespace)
 	if err != nil {
@@ -251,7 +261,18 @@ func getProtocol() string {
 	}
 }
 func getHttp(path string) (resp *http.Response, err error) {
-	return http.Get(getProtocol() + "localhost:" + fmt.Sprint(ApiPort) + "/api/v1/" + path)
+	request, err := http.NewRequest("GET", getProtocol()+"localhost:"+fmt.Sprint(ApiPort)+"/api/v1/"+path, nil)
+	if err != nil {
+		log.Printf("Error creating request for %s, error: %v", path, err)
+		return nil, err
+	}
+	request.Header.Set("Authorization", "Bearer "+bearerToken)
+	response, err := client.Do(request)
+	if err != nil {
+		log.Printf("Error doing request for %s, error: %v", path, err)
+		return nil, err
+	}
+	return response, nil
 }
 func parseHtmlToBytes(response *http.Response) (result []byte, err error) {
 	defer response.Body.Close()
