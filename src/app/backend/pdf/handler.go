@@ -86,6 +86,25 @@ func jweFormatCookieString(cookie string) string {
 	cookie = strings.ReplaceAll(cookie, "%7D", "}")
 	return cookie
 }
+func extractBearerTokenFromRequest(request *restful.Request) error {
+	// decrypt bearer token from cookie
+	cookie, err := request.Request.Cookie("jweToken")
+	if err != nil {
+		log.Printf("Error getting cookie 'jweToken' from request: %v", err)
+		setBearerToken("")
+		return err
+	} else {
+		encrypted := jweFormatCookieString(cookie.Value)
+		authInfo, err := tokenManager.Decrypt(encrypted)
+		if err != nil {
+			log.Printf("Error decrypting bearer token: %v", err)
+			setBearerToken("")
+			return err
+		}
+		setBearerToken(authInfo.Token)
+		return nil
+	}
+}
 
 // handler functions
 func getPdfList(request *restful.Request, response *restful.Response) {
@@ -121,19 +140,9 @@ func genHealthCheckPdf(request *restful.Request, response *restful.Response) {
 	namespace := request.PathParameter("namespace")
 	log.Printf("Generating health check pdf for %v", namespace)
 
-	// decrypt bearer token from cookie
-	cookie, err := request.Request.Cookie("jweToken")
+	err := extractBearerTokenFromRequest(request)
 	if err != nil {
-		log.Printf("Error getting cookie 'jweToken' from request: %v", err)
-		log.Printf("Trying to generate health check report without bearer token")
-		setBearerToken("")
-	} else {
-		encrypted := jweFormatCookieString(cookie.Value)
-		authInfo, err := tokenManager.Decrypt(encrypted)
-		if err != nil {
-			log.Printf("Error decrypting bearer token: %v", err)
-		}
-		setBearerToken(authInfo.Token)
+		log.Printf("Error extracting bearer token from request: %v. Trying to generate health check report without bearer token", err)
 	}
 
 	fileName, err := GenerateHealthCheckReport(namespace)
@@ -220,6 +229,7 @@ func SetTokenManager(tokenMgr authApi.TokenManager) {
 	tokenManager = tokenMgr
 }
 
+// Initialize pdf api handler
 func CreatePdfApiHandler(port int, isSecure bool) (http.Handler, error) {
 	ApiPort = port
 	Secure = isSecure
