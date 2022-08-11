@@ -654,6 +654,17 @@
           <context context-type="linenumber">68</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="1868606282505332204" datatype="html">
+        <source>Reports</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/index.messages.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="7542300534444838884" datatype="html">
         <source>Kubernetes Dashboard</source>
         <context-group purpose="location">
@@ -756,6 +767,13 @@
         <source>Delete resource</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/common/components/actionbar/detailactions/delete/template.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1340474636551072849" datatype="html">
+        <source>Export PDF report</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/common/components/actionbar/detailactions/pdf/template.html</context>
           <context context-type="linenumber">21</context>
         </context-group>
       </trans-unit>
@@ -1463,6 +1481,10 @@
           <context context-type="linenumber">29</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/workloads/deployment/detail/template.html</context>
           <context context-type="linenumber">224</context>
         </context-group>
@@ -1869,6 +1891,10 @@
           <context context-type="sourcefile">src/app/frontend/common/components/list/column/menu/template.html</context>
           <context context-type="linenumber">66</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="3796390051357100906" datatype="html">
         <source>Exec</source>
@@ -1971,6 +1997,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/common/components/namespace/changedialog/template.html</context>
           <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">30</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3542042671420335679" datatype="html">
@@ -3288,25 +3318,32 @@
           <context context-type="linenumber">173,174</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="7556931951715777328" datatype="html">
+        <source>Reports </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
+          <context context-type="linenumber">183,184</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="7207867066492367466" datatype="html">
         <source>Settings </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
-          <context context-type="linenumber">192</context>
+          <context context-type="linenumber">200</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4894366697856944217" datatype="html">
         <source>About </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">205</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7293190222859783293" datatype="html">
         <source>Plugins </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
-          <context context-type="linenumber">184</context>
+          <context context-type="linenumber">192</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8323422358213440128" datatype="html">
@@ -3375,6 +3412,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/create/from/input/template.html</context>
           <context context-type="linenumber">48</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/config/secret/detail/edit/template.html</context>
@@ -3800,13 +3841,6 @@
           <context context-type="linenumber">23,25</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="728108318392658678" datatype="html">
-        <source> Shell in <x id="START_TAG_MAT_SELECT" ctype="x-mat_select" equiv-text="&quot;\uFFFD*3:1\uFFFD\uFFFD#1:1\uFFFD&quot;"/><x id="START_TAG_MAT_OPTION" ctype="x-mat_option" equiv-text="&quot;\uFFFD*2:2\uFFFD\uFFFD#1:2\uFFFD&quot;"/> <x id="INTERPOLATION" equiv-text="&quot;\uFFFD0:2\uFFFD&quot;"/> <x id="CLOSE_TAG_MAT_OPTION" ctype="x-mat_option" equiv-text="&quot;\uFFFD/#1:2\uFFFD\uFFFD/*2:2\uFFFD&quot;"/><x id="CLOSE_TAG_MAT_SELECT" ctype="x-mat_select" equiv-text="&quot;\uFFFD/#1:1\uFFFD\uFFFD/*3:1\uFFFD&quot;"/> in <x id="INTERPOLATION_1" equiv-text="&quot;\uFFFD0\uFFFD&quot;"/> </source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/frontend/shell/template.html</context>
-          <context context-type="linenumber">22,33</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="3207734347890377749" datatype="html">
         <source>Read documentation</source>
         <context-group purpose="location">
@@ -3833,6 +3867,13 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/about/template.html</context>
           <context context-type="linenumber">37,41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="728108318392658678" datatype="html">
+        <source> Shell in <x id="START_TAG_MAT_SELECT" ctype="x-mat_select" equiv-text="&quot;\uFFFD*3:1\uFFFD\uFFFD#1:1\uFFFD&quot;"/><x id="START_TAG_MAT_OPTION" ctype="x-mat_option" equiv-text="&quot;\uFFFD*2:2\uFFFD\uFFFD#1:2\uFFFD&quot;"/> <x id="INTERPOLATION" equiv-text="&quot;\uFFFD0:2\uFFFD&quot;"/> <x id="CLOSE_TAG_MAT_OPTION" ctype="x-mat_option" equiv-text="&quot;\uFFFD/#1:2\uFFFD\uFFFD/*2:2\uFFFD&quot;"/><x id="CLOSE_TAG_MAT_SELECT" ctype="x-mat_select" equiv-text="&quot;\uFFFD/#1:1\uFFFD\uFFFD/*3:1\uFFFD&quot;"/> in <x id="INTERPOLATION_1" equiv-text="&quot;\uFFFD0\uFFFD&quot;"/> </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/shell/template.html</context>
+          <context context-type="linenumber">22,33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8703572208950935791" datatype="html">
@@ -4629,15 +4670,57 @@
           <context context-type="linenumber">186</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="1138967786822653104" datatype="html">
-        <source>Role Reference</source>
+      <trans-unit id="8409544799262519924" datatype="html">
+        <source>Manage Reports</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/frontend/resource/cluster/clusterrolebinding/detail/template.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7596988543265053330" datatype="html">
+        <source>Generate Report</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5610425955750546094" datatype="html">
+        <source>Template</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7191922966431442466" datatype="html">
+        <source>Namepace</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5896009741331779309" datatype="html">
+        <source>Generate Selected Report</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8164493720902520691" datatype="html">
+        <source>Download All Reports</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/frontend/resource/cluster/rolebinding/detail/template.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3471192731553526505" datatype="html">
+        <source>Are you sure you want to delete &quot;<x id="INTERPOLATION" equiv-text="&quot;\uFFFD0\uFFFD&quot;"/>&quot;?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3482104516399089245" datatype="html">
@@ -4698,6 +4781,17 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/workloads/cronjob/detail/template.html</context>
           <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1138967786822653104" datatype="html">
+        <source>Role Reference</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/resource/cluster/clusterrolebinding/detail/template.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/resource/cluster/rolebinding/detail/template.html</context>
+          <context context-type="linenumber">28</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1686914328067460503" datatype="html">

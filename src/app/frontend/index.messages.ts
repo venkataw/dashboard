@@ -66,4 +66,5 @@ export const BREADCRUMBS: IBreadcrumbMessage = {
   [IBreadcrumbMessageKey.CustomResourceDefinitions]: $localize`Custom Resource Definitions`,
   [IBreadcrumbMessageKey.Settings]: $localize`Settings`,
   [IBreadcrumbMessageKey.About]: $localize`About`,
+  [IBreadcrumbMessageKey.Reports]: $localize`Reports`,
 };

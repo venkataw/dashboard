@@ -110,6 +110,10 @@
           <context context-type="linenumber">48</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/config/secret/detail/edit/template.html</context>
           <context context-type="linenumber">35</context>
         </context-group>
@@ -154,6 +158,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/common/components/list/column/menu/template.html</context>
           <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5352570882809799670" datatype="html">
@@ -904,6 +912,10 @@
           <context context-type="linenumber">29</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/resource/workloads/deployment/detail/template.html</context>
           <context context-type="linenumber">224</context>
         </context-group>
@@ -1394,6 +1406,14 @@
           <context context-type="linenumber">25</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="1340474636551072849" datatype="html">
+        <source>Export PDF report</source>
+        <target state="new">Export PDF report</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/common/components/actionbar/detailactions/pdf/template.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="1371553127733924023" datatype="html">
         <source>Scale</source>
         <target>Mettre à l'échelle</target>
@@ -1782,13 +1802,21 @@
           <context context-type="linenumber">173</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="7556931951715777328" datatype="html">
+        <source>Reports </source>
+        <target state="new">Reports </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
+          <context context-type="linenumber">183,184</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="7293190222859783293" datatype="html">
         <source>Plugins </source>
         <target state="new">Plugins
         </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
-          <context context-type="linenumber">184</context>
+          <context context-type="linenumber">192</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7207867066492367466" datatype="html">
@@ -1797,7 +1825,7 @@
       </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
-          <context context-type="linenumber">192</context>
+          <context context-type="linenumber">200</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4894366697856944217" datatype="html">
@@ -1806,7 +1834,7 @@
       </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/chrome/nav/template.html</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">205</context>
         </context-group>
       </trans-unit>
       <trans-unit id="322645671410395107" datatype="html">
@@ -3763,6 +3791,10 @@
           <context context-type="sourcefile">src/app/frontend/common/components/namespace/changedialog/template.html</context>
           <context context-type="linenumber">32</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="3542042671420335679" datatype="html">
         <source>No</source>
@@ -4074,6 +4106,18 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/index.messages.ts</context>
           <context context-type="linenumber">68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1868606282505332204" datatype="html">
+        <source>Reports</source>
+        <target state="new">Reports</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/index.messages.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">55</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4814940703935231049" datatype="html">
@@ -6549,6 +6593,66 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/frontend/settings/local/template.html</context>
           <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8409544799262519924" datatype="html">
+        <source>Manage Reports</source>
+        <target state="new">Manage Reports</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7596988543265053330" datatype="html">
+        <source>Generate Report</source>
+        <target state="new">Generate Report</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5610425955750546094" datatype="html">
+        <source>Template</source>
+        <target state="new">Template</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7191922966431442466" datatype="html">
+        <source>Namepace</source>
+        <target state="new">Namepace</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5896009741331779309" datatype="html">
+        <source>Generate Selected Report</source>
+        <target state="new">Generate Selected Report</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8164493720902520691" datatype="html">
+        <source>Download All Reports</source>
+        <target state="new">Download All Reports</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/template.html</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3471192731553526505" datatype="html">
+        <source>Are you sure you want to delete "<x id="INTERPOLATION" equiv-text="&quot;\uFFFD0\uFFFD&quot;"/>"?</source>
+        <target state="new">Are you sure you want to delete "<x id="INTERPOLATION" equiv-text="&quot;\uFFFD0\uFFFD&quot;"/>"?</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/frontend/pdf/delete-dialog.html</context>
+          <context context-type="linenumber">20</context>
         </context-group>
       </trans-unit>
     </body>

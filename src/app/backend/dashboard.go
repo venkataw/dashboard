@@ -39,6 +39,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/handler"
 	"github.com/kubernetes/dashboard/src/app/backend/integration"
 	integrationapi "github.com/kubernetes/dashboard/src/app/backend/integration/api"
+	"github.com/kubernetes/dashboard/src/app/backend/pdf"
 	"github.com/kubernetes/dashboard/src/app/backend/settings"
 	"github.com/kubernetes/dashboard/src/app/backend/sync"
 	"github.com/kubernetes/dashboard/src/app/backend/systembanner"
@@ -159,12 +160,30 @@ func main() {
 		servingCerts = []tls.Certificate{servingCert}
 	}
 
+	// PDF Report API handler
+	var pdfHandler http.Handler
+	if servingCerts != nil {
+		pdfHandler, err = pdf.CreatePdfApiHandler(args.Holder.GetPort(), true)
+	} else {
+		pdfHandler, err = pdf.CreatePdfApiHandler(args.Holder.GetInsecurePort(), false)
+	}
+	if err != nil {
+		handleFatalInitError(err)
+	}
+
 	// Run a HTTP server that serves static public files from './public' and handles API calls.
 	http.Handle("/", handler.MakeGzipHandler(handler.CreateLocaleHandler()))
 	http.Handle("/api/", apiHandler)
 	http.Handle("/config", handler.AppHandler(handler.ConfigHandler))
 	http.Handle("/api/sockjs/", handler.CreateAttachHandler("/api/sockjs"))
 	http.Handle("/metrics", promhttp.Handler())
+	http.Handle("/pdf/", pdfHandler)
+
+	// TEMP!! EXPORT TEST PDF
+	// TODO: delete this when pdf system is ready
+	_, pdferr := pdf.GenerateTestReport()
+	log.Print("Test template pdf exported to " + pdf.ReportDir)
+	log.Print(pdferr)
 
 	// Listen for http or https
 	if servingCerts != nil {
@@ -204,6 +223,9 @@ func initAuthManager(clientManager clientapi.ClientManager) authApi.AuthManager 
 	if tokenTTL != authApi.DefaultTokenTTL {
 		tokenManager.SetTokenTTL(tokenTTL)
 	}
+
+	// Let pdf api decrypt to get bearer token by giving tokenManager
+	pdf.SetTokenManager(tokenManager)
 
 	// Set token manager for client manager.
 	clientManager.SetTokenManager(tokenManager)
